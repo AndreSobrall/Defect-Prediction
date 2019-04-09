@@ -72,6 +72,20 @@ public class ReversePolishNotation {
         memory = 0;
     }
 
+    public void testing() {
+        int x = 2;
+        if(x > ONE_BILLION)
+            System.out.println("testing");
+        while(x < 100) {
+            x++;
+        }
+
+        for(int y = 0; y < x; y++) {
+            x--;
+        }
+
+    }
+
 
     public void memoryStore(double value){
         memory = value;
