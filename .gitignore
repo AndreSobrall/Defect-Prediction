@@ -1,4 +1,6 @@
 backup/
 .DS_Store
-*/.DS_Store
+.*/.DS_Store
 bugPredictor/target/
+bugs-dot-jar/
+bugs-dot-jar-dissection/

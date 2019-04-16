@@ -16,7 +16,7 @@ public class OutputMap {
 
 	Map<String, Integer> mapping 	= new HashMap<String, Integer>();
 	List<Integer> 		 int_array 	= new ArrayList<Integer>();
-	int 				 id 		= 0;
+	int 				 id 		= 1;
 
 	/* -------------------- */
 	/*		Class Logic		*/
