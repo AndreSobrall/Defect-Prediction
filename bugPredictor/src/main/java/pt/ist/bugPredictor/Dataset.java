@@ -21,6 +21,7 @@ public class Dataset {
 	private String currentBranch;
 	private List<String> branches;
 	
+	// TODO: Populate
 	// key: branchName, val: tuple<release, master> Each Object with token vector and int array.
 	private Map<String, List<CodeFile>> codeFiles;
 
@@ -61,6 +62,7 @@ public class Dataset {
 			if (matcher.find()){
 			    // System.out.println("Matched portion:\n" + matcher.group(0));
 			    String gitBranch = matcher.group(0);
+
 			    if(!gitBranches.contains(gitBranch))
 			    	gitBranches.add(gitBranch);
 			} 
@@ -77,6 +79,12 @@ public class Dataset {
     		currentBranch = branchName; 
     	}
 	}
+
+	// TODO: Populate codeFiles
+	// For each branch get buggy file
+	// checkout to master
+	// get the fixed file
+	// store as entry in codeFiles using brnachName
 
 
 	/* ------------------------ */
@@ -96,10 +104,8 @@ public class Dataset {
 		System.out.println("Dataset Name: \t" + datasetName);
 		System.out.println("Dataset Path: \t" + datasetPath);
 		System.out.println("\n---------- GIT Info ----------");
-		System.out.println("Current Branch: 	"+ currentBranch);
-		System.out.println("\nOther Available Branches: ");
-		for(String branch : this.branches)
-			System.out.println(branch);
+		System.out.println("Current Branch: "+ currentBranch);
+		System.out.println("Other Available Branches: " + branches.size());
 		System.out.println("-------------------------------\n");
 	}
 

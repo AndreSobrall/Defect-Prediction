@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import pt.ist.bugPredictor.Dataset;
-import pt.ist.bugPredictor.parser.BuggyFile;
+import pt.ist.bugPredictor.BuggyFile;
 import pt.ist.bugPredictor.parser.TokenVisitor;
 import pt.ist.bugPredictor.parser.OutputMap;
 
@@ -22,11 +22,10 @@ public class App
 		datasets = new HashMap<String, Dataset>();
 		
 		// for all datasets		
-		// for(String datasetName : this.datasetNames) {
-		// 	datasets.put(datasetName, new Dataset(prefix + datasetName + "/"));
-		// }
+		for(String datasetName : datasetNames) {
+			datasets.put(datasetName, new Dataset(datasetName, path_to_datasets + datasetName + "/"));
+		}
 
-		datasets.put("accumulo", new Dataset("accumulo", path_to_datasets + "accumulo" + "/"));
 	}
 
 
@@ -43,8 +42,8 @@ public class App
         // TODO:
         // Files have vector tokens and corresponding mappings
         // maybe Abstract File notion?
-        Dataset d = app.datasets.get("accumulo");
-        d.printDataset();
+        for(Dataset d: app.datasets.values())
+      		d.printDataset();
     	
 
     	//----------------
