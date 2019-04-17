@@ -20,6 +20,9 @@ public class Dataset {
 	private String datasetPath;
 	private String currentBranch;
 	private List<String> branches;
+
+	// Aux String[]
+	private final String[] MASTER = {"master", "HEAD"};
 	
 	// TODO: Populate
 	// key: branchName, val: tuple<release, master> Each Object with token vector and int array.
@@ -36,19 +39,23 @@ public class Dataset {
 		}
 	}
 
-	private String getCurrentGitBranch() throws IOException, InterruptedException {
+	public String getCurrentGitBranch() throws IOException, InterruptedException {
     	String cmd = "git rev-parse --abbrev-ref HEAD";
     	Process process = Runtime.getRuntime().exec(cmd, null, new File(this.datasetPath));
     	process.waitFor();
     	BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    	return reader.readLine();
+    	String currentBranch = reader.readLine();
+    	if(currentBranch.equals(MASTER[1]))
+    		currentBranch = MASTER[0];
+    	return currentBranch;
 	}
 
 	private List<String> getDatasetGitBranches() throws IOException, InterruptedException {
+		
 		List<String> gitBranches = new ArrayList<String>();
-		String cmd = "git branch -a", line;
 		
 		// List branches
+		String cmd = "git branch -a", line;
 		Process process = Runtime.getRuntime().exec(cmd, null, new File(this.datasetPath));
     	process.waitFor();
 
@@ -71,13 +78,18 @@ public class Dataset {
         return gitBranches;
 	}
 
-	private void checkoutGitBranch(String branchName) throws IOException, InterruptedException {
+	public void checkoutGitBranch(String branchName) throws IOException, InterruptedException {
 		if(!currentBranch.equals(branchName)) {
 			String cmd = "git checkout " + branchName;
 			Process process = Runtime.getRuntime().exec(cmd, null, new File(this.datasetPath));
     		process.waitFor();
+    		System.out.println("Switched from branch " + currentBranch + " -> " + branchName);
     		currentBranch = branchName; 
     	}
+	}
+
+	public void checkoutToMasterBranch() throws IOException, InterruptedException {
+			checkoutGitBranch(MASTER[0]);
 	}
 
 	// TODO: Populate codeFiles
@@ -85,6 +97,8 @@ public class Dataset {
 	// checkout to master
 	// get the fixed file
 	// store as entry in codeFiles using brnachName
+	// ...........
+	// Begin by doing it only for the current branch
 
 
 	/* ------------------------ */
@@ -97,6 +111,10 @@ public class Dataset {
 
 	public String getDatasetPath() {
 		return datasetPath;
+	}
+
+	public String getCurrGitBranch() {
+		return currentBranch;
 	}
 
 	public void printDataset() {

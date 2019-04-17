@@ -39,12 +39,16 @@ public class App
         // TokenVisitor parser = new TokenVisitor();
         // parser.exec();
 
-        // TODO:
-        // Files have vector tokens and corresponding mappings
-        // maybe Abstract File notion?
-        for(Dataset d: app.datasets.values())
-      		d.printDataset();
-    	
+    	try {
+        	Dataset dataset = app.datasets.get("accumulo");
+        	dataset.printDataset();
+        	//dataset.checkoutToMasterBranch();
+        	dataset.checkoutGitBranch("bugs-dot-jar_ACCUMULO-1044_9396979b");
+			dataset.printDataset();
+			System.out.println(dataset.getCurrentGitBranch()); 
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 
     	//----------------
         // EX: Mapping
