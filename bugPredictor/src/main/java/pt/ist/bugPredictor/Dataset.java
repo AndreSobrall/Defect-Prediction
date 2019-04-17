@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import pt.ist.bugPredictor.Dataset;
-
 
 public class Dataset {
 	private String datasetName;
@@ -25,12 +23,13 @@ public class Dataset {
 	private final String[] MASTER = {"master", "HEAD"};
 	
 	// TODO: Populate
-	// key: branchName, val: tuple<release, master> Each Object with token vector and int array.
+	// key: branchName, val: tuple<fixed, buggy> Each Object with token vector and int array.
 	private Map<String, List<CodeFile>> codeFiles;
 
 	public Dataset(String name, String path) {
 		this.datasetName = name;
 		this.datasetPath = path;
+		this.codeFiles 	 = new HashMap<String, List<CodeFile>>(); 
 		try {
 			currentBranch = getCurrentGitBranch();
 			branches 	  = getDatasetGitBranches();
@@ -38,6 +37,67 @@ public class Dataset {
 			System.out.println(e.getMessage());
 		}
 	}
+
+	// TODO: Populate codeFiles
+	// For each branch get buggy file
+	// checkout to master
+	// get the fixed file
+	// store as entry in codeFiles using brnachName
+	// ...........
+	// Begin by doing it only for the current branch
+	public void processCodeFiles() throws IOException, InterruptedException {
+		
+		// Process all buggy files first in order to only checkout to master once
+		List<BuggyFile> buggies = processBuggyFiles();
+
+		// Switch to the git master branch
+		checkoutToMasterBranch();
+
+		// For each buggy file, process the corresponding fixed file
+		for(BuggyFile buggy : buggies) {
+			FixedFile fixed = new FixedFile(buggy.getFileName(), this);
+			addCodeFile(fixed, buggy);
+		}
+	}
+
+	// For each git branch processes a BuggyFile: 
+	public List<BuggyFile> processBuggyFiles() throws IOException, InterruptedException {
+		List<BuggyFile> buggies = new ArrayList<BuggyFile>();
+		for(String branch : branches)
+			buggies.add(processBuggyFile(branch));
+		return buggies;
+	}
+
+	// Process a BuggyFile: 
+	// checkouts to corresponding branch and creates a buggyFile
+	public BuggyFile processBuggyFile(String branch) throws IOException, InterruptedException {
+		checkoutGitBranch(branch);
+		return new BuggyFile(branch, this.datasetPath);
+	}
+
+
+	// Add an entry to codeFiles Map
+	// key: branchName, val: [fixed, buggy]
+	public void addCodeFile(FixedFile fixed, BuggyFile buggy) {
+		List<CodeFile> files = new ArrayList<CodeFile>();
+		String branch = buggy.getBranch();
+		files.add(fixed);
+		files.add(buggy);
+		codeFiles.put(branch,files);
+	}
+
+	// TODO: Remove
+	// Only here to test entire pipeline
+	public void processCodeFiles(String branch) throws IOException, InterruptedException {
+		BuggyFile buggy = processBuggyFile(branch);
+		checkoutToMasterBranch();
+		FixedFile fixed = new FixedFile(buggy.getFileName(), this);
+		addCodeFile(fixed, buggy);
+	}
+
+	/* ------------------------ */
+	/* 	 	 Git Methods		*/
+	/* ------------------------ */
 
 	public String getCurrentGitBranch() throws IOException, InterruptedException {
     	String cmd = "git rev-parse --abbrev-ref HEAD";
@@ -49,6 +109,7 @@ public class Dataset {
     		currentBranch = MASTER[0];
     	return currentBranch;
 	}
+
 
 	private List<String> getDatasetGitBranches() throws IOException, InterruptedException {
 		
@@ -78,27 +139,22 @@ public class Dataset {
         return gitBranches;
 	}
 
+
 	public void checkoutGitBranch(String branchName) throws IOException, InterruptedException {
 		if(!currentBranch.equals(branchName)) {
 			String cmd = "git checkout " + branchName;
 			Process process = Runtime.getRuntime().exec(cmd, null, new File(this.datasetPath));
     		process.waitFor();
-    		System.out.println("Switched from branch " + currentBranch + " -> " + branchName);
+    		System.out.println("Switched from branch \'" + currentBranch + "\' -> \'" + branchName + "\'");
     		currentBranch = branchName; 
     	}
 	}
+
 
 	public void checkoutToMasterBranch() throws IOException, InterruptedException {
 			checkoutGitBranch(MASTER[0]);
 	}
 
-	// TODO: Populate codeFiles
-	// For each branch get buggy file
-	// checkout to master
-	// get the fixed file
-	// store as entry in codeFiles using brnachName
-	// ...........
-	// Begin by doing it only for the current branch
 
 
 	/* ------------------------ */
@@ -115,6 +171,10 @@ public class Dataset {
 
 	public String getCurrGitBranch() {
 		return currentBranch;
+	}
+
+	public List<String> getGitBranches() {
+		return branches;
 	}
 
 	public void printDataset() {

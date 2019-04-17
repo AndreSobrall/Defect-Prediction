@@ -23,7 +23,7 @@ public class App
 		
 		// for all datasets		
 		for(String datasetName : datasetNames) {
-			datasets.put(datasetName, new Dataset(datasetName, path_to_datasets + datasetName + "/"));
+			datasets.put(datasetName, new Dataset(datasetName, path_to_datasets + datasetName));
 		}
 
 	}
@@ -42,10 +42,9 @@ public class App
     	try {
         	Dataset dataset = app.datasets.get("accumulo");
         	dataset.printDataset();
-        	//dataset.checkoutToMasterBranch();
-        	dataset.checkoutGitBranch("bugs-dot-jar_ACCUMULO-1044_9396979b");
-			dataset.printDataset();
-			System.out.println(dataset.getCurrentGitBranch()); 
+			// dataset.processCodeFiles();
+        	dataset.processCodeFiles("bugs-dot-jar_ACCUMULO-1183_cfbf5999");
+
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

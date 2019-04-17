@@ -22,13 +22,17 @@ public abstract class CodeFile {
 	protected abstract void setFilePath(String path);
 	protected abstract void setFileName(String name);
 
-	public String filePath() {
+	public String getFilePath() {
 		return filePath;
 	}
 
-	public String fileName() {
+	public String getFileName() {
 		return fileName;
 	}
+
+	public String getBranch() {
+		return branch;
+	}	
 
 	public List<Integer> getMapping() {
 		return mapping;

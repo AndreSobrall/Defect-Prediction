@@ -9,9 +9,10 @@ import java.io.IOException;
 public class BuggyFile extends CodeFile {
 	private final String diffPath;
 
-	public BuggyFile(String branch, String datasetName) {
+	public BuggyFile(String branch, String datasetPath) {
 		this.branch   = branch;
-		this.diffPath = datasetName + "/.bugs-dot-jar/developer-patch.diff";
+		this.diffPath = datasetPath + "/.bugs-dot-jar/developer-patch.diff";
+		this.filePath = datasetPath;
 		parseDiff();
 	}
 
@@ -19,8 +20,6 @@ public class BuggyFile extends CodeFile {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(diffPath));
 			String line = reader.readLine();
-			System.out.println("diff line: ");
-			System.out.println(line);
 			for(String token: line.split(" ")) {
 				if(token.contains("/")) {
 					setFilePath(token);
@@ -28,12 +27,8 @@ public class BuggyFile extends CodeFile {
 					break; 
 				}
 			}
-			System.out.println("filePath: ");
-			System.out.println(filePath);
-			System.out.println("fileName: ");
-			System.out.println(fileName);
-			System.out.println("-----------------------------");
-			System.out.println(" ");
+
+			printDebugInfo(line);
 
 			reader.close();
 		} catch(IOException e) {
@@ -50,14 +45,22 @@ public class BuggyFile extends CodeFile {
             	break;
         	}
     	}
-
-		this.filePath = diffLine.substring(i, diffLine.length());
+		this.filePath += "/" + diffLine.substring(i, diffLine.length());
 	}
 
 	@Override
 	protected void setFileName(String filePath) {
 		String[] tokens = filePath.split("/");
 		this.fileName = tokens[tokens.length-1];
+	}
+
+	public void printDebugInfo(String diffLine) {
+		// System.out.println("diff line:" + diffLine);
+		System.out.println("--------- BUGGY FILE ---------");
+		System.out.println("filePath: \t" + this.filePath);
+		System.out.println("fileName: \t" + this.fileName);
+		System.out.println("-----------------------------");
+		System.out.println(" ");
 	}
 
 }
