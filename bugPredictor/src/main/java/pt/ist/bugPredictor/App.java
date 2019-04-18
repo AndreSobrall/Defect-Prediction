@@ -2,42 +2,33 @@ package pt.ist.bugPredictor;
 
 import java.util.Map;
 import java.util.HashMap;
-
 import pt.ist.bugPredictor.Dataset;
-import pt.ist.bugPredictor.BuggyFile;
-import pt.ist.bugPredictor.parser.TokenVisitor;
-import pt.ist.bugPredictor.parser.OutputMap;
-
+import pt.ist.bugPredictor.parser.IntMapper;
 
 public class App 
 {	
 	Map<String, Dataset> datasets;
+	IntMapper mapper;
 
 	public App() {
+		this.mapper = new IntMapper();
+		createDatasets();		
+	}
+
+	private void createDatasets() {
 		final String[] datasetNames = { "accumulo", "camel", "commons-math", 
 										"flink", "jackrabbit-oak", "logging-log4j2", 
-										"maven", "wicket"};
-		final String path_to_datasets = "../bugs-dot-jar/";
-		
-		datasets = new HashMap<String, Dataset>();
-		
+										"maven", "wicket"};		
+		this.datasets = new HashMap<String, Dataset>();
 		// for all datasets		
-		for(String datasetName : datasetNames) {
-			datasets.put(datasetName, new Dataset(datasetName, path_to_datasets + datasetName));
-		}
-
+		for(String datasetName : datasetNames)
+			this.datasets.put(datasetName, new Dataset(datasetName, "../bugs-dot-jar/" + datasetName, this.mapper));
 	}
 
 
     public static void main( String[] args )
     {	
     	App app = new App();
-
-    	//----------------
-    	// EX: TokenParser
-        // System.out.println( "Hello World!" );
-        // TokenVisitor parser = new TokenVisitor();
-        // parser.exec();
 
     	try {
         	Dataset dataset = app.datasets.get("accumulo");
@@ -49,43 +40,7 @@ public class App
 			e.printStackTrace();
 		}
 
-    	//----------------
-        // EX: Mapping
-        // OutputMap mapping = new OutputMap();
-        // mapping.addToken("ola");
-        // mapping.addToken("andre");
-        // mapping.addToken("luis");
-        // mapping.addToken("carolina");
-        // mapping.addToken("fender");
-        // mapping.addToken("defectPrediction");
-        // mapping.addToken("exec");
-        // mapping.addToken("leonidas");
-        // mapping.addToken("allrighty");
-        // mapping.addToken("theyams");
-        // mapping.addToken("indierocku");
-        // mapping.addToken("theyams");
-        // mapping.addToken("ola");
-        // mapping.addToken("andre");
-        // mapping.addToken("ola");
-        // mapping.addToken("andre");
-        // mapping.addToken("luis");
-        // mapping.addToken("carolina");
-        // mapping.addToken("fender");
-        // mapping.addToken("defectPrediction");
-        // mapping.addToken("exec");
-        // mapping.addToken("leonidas");
-        // mapping.addToken("allrighty");
-        // mapping.addToken("theyams");
-        // mapping.addToken("indierocku");
-        // mapping.addToken("theyams");
-        // mapping.addToken("ola");
-        // mapping.addToken("andre");
-        // mapping.printMapping();
-     //    mapping.printIntArray();
-     //    try {
-     //    	mapping.writeToFile("HelloWorld.txt"); 
-    	// } catch(Exception e) {
-    	// 	System.out.println(e.getMessage());
-    	// }
+		// TODO: write mapper to file
+		// mapper.writeToFile(...)
     }
 }

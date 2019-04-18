@@ -8,22 +8,33 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class OutputMap {
+public class IntMapper {
 
 	/* ------------------------ */
 	/*		Data Structures		*/
 	/* ------------------------ */
 
-	Map<String, Integer> mapping 	= new HashMap<String, Integer>();
-	List<Integer> 		 int_array 	= new ArrayList<Integer>();
-	int 				 id 		= 1;
+	private Map<String, Integer> mapping;
+	private int id;
+
+	public IntMapper() {
+		this.mapping = new HashMap<String, Integer>();
+		this.id = 1;
+	}
 
 	/* -------------------- */
 	/*		Class Logic		*/
 	/* -------------------- */
 
-	// Adds token to map and add corresponding int to integer array.
-	public void addToken(String token) {
+	public List<Integer> getIntArray(List<String> tokens) {
+		List<Integer> int_array = new ArrayList<Integer>();
+		for(String token : tokens)
+			int_array.add(getTokenId(token));
+		return int_array;
+	} 
+
+	// Gets id for string token
+	public int getTokenId(String token) {
 
 		// if first time seeing this token, assign an id to it.
 		if(!mapping.containsKey(token)) {
@@ -31,8 +42,8 @@ public class OutputMap {
 			inc_id(); // update id to an unused one.
 		}
 
-		// add to integer array
-		int_array.add(mapping.get(token));
+		// return integer id
+		return mapping.get(token);
 	}
 
 	// Increases readability, increments id.
@@ -42,12 +53,11 @@ public class OutputMap {
 
 
 
-
 	/* -------------------- */
 	/*		File Writer		*/
 	/* -------------------- */
 
-	public void writeToFile(String fileName) throws IOException {
+	public void writeToFile(String fileName, List<Integer> int_array) throws IOException {
 
 		String path = "output/" + fileName;
 
@@ -65,7 +75,7 @@ public class OutputMap {
 	/*		Printing Functions		*/
 	/* ---------------------------- */
 
-	public void printIntArray() {
+	public void printIntArray(List<Integer> int_array) {
 		int loc = 0;
 		int section_size = 10;
 		int sections = int_array.size()/section_size;

@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import pt.ist.bugPredictor.parser.Tokenizer;
+import pt.ist.bugPredictor.parser.IntMapper;
+
 
 public class Dataset {
 	private String datasetName;
@@ -19,17 +22,19 @@ public class Dataset {
 	private String currentBranch;
 	private List<String> branches;
 
-	// Aux String[]
-	private final String[] MASTER = {"master", "HEAD"};
-	
-	// TODO: Populate
-	// key: branchName, val: tuple<fixed, buggy> Each Object with token vector and int array.
 	private Map<String, List<CodeFile>> codeFiles;
+	private IntMapper mapper;
+	private Tokenizer tokenizer;
+	
+	private final String[] MASTER = {"master", "HEAD"}; // Aux String[]
+	
 
-	public Dataset(String name, String path) {
+	public Dataset(String name, String path, IntMapper mapper) {
 		this.datasetName = name;
 		this.datasetPath = path;
-		this.codeFiles 	 = new HashMap<String, List<CodeFile>>(); 
+		this.mapper 	 = mapper;
+		this.tokenizer   = new Tokenizer(); 
+		this.codeFiles 	 = new HashMap<String, List<CodeFile>>();
 		try {
 			currentBranch = getCurrentGitBranch();
 			branches 	  = getDatasetGitBranches();
@@ -72,9 +77,18 @@ public class Dataset {
 	// checkouts to corresponding branch and creates a buggyFile
 	public BuggyFile processBuggyFile(String branch) throws IOException, InterruptedException {
 		checkoutGitBranch(branch);
-		return new BuggyFile(branch, this.datasetPath);
+		BuggyFile buggy = new BuggyFile(branch, this.datasetPath);
+		buggy.processContents(tokenizer, mapper);
+		return buggy;
 	}
 
+	// Process a FixedFile: 
+	// creates a FixedFile and processes contents
+	public FixedFile processFixedFile(String fileName, Dataset dataset) throws IOException, InterruptedException {
+		FixedFile fixed = new FixedFile(fileName, dataset);
+		fixed.processContents(tokenizer, mapper);
+		return fixed;
+	}
 
 	// Add an entry to codeFiles Map
 	// key: branchName, val: [fixed, buggy]
@@ -91,7 +105,7 @@ public class Dataset {
 	public void processCodeFiles(String branch) throws IOException, InterruptedException {
 		BuggyFile buggy = processBuggyFile(branch);
 		checkoutToMasterBranch();
-		FixedFile fixed = new FixedFile(buggy.getFileName(), this);
+		FixedFile fixed = processFixedFile(buggy.getFileName(), this);
 		addCodeFile(fixed, buggy);
 	}
 

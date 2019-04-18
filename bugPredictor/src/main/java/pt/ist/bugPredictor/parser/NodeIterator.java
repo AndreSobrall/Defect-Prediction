@@ -14,6 +14,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.BlockStmt;
  
 public class NodeIterator {
+    
     private List<String> tokens = new ArrayList();
  
     public void explore(Node node) {
@@ -83,5 +84,8 @@ public class NodeIterator {
         System.out.println(); // empty line
     }
 
+    public List<String> getFileTokens() {
+        return tokens;
+    }
 
 }
