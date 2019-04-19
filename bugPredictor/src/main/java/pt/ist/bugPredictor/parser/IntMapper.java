@@ -4,13 +4,19 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
 import pt.ist.bugPredictor.CodeFile;
+import pt.ist.bugPredictor.FixedFile;
 
 public class IntMapper {
+
+	public final String ANSI_RESET = "\u001B[0m";
+	public final String ANSI_RED   = "\u001B[31m";
+	public final String ANSI_GREEN = "\u001B[32m";
 
 	/* ------------------------ */
 	/*		Data Structures		*/
@@ -62,17 +68,51 @@ public class IntMapper {
 	/*		File Writer		*/
 	/* -------------------- */
 
-	public void writeCodeFile(String datasetName, CodeFile file) throws IOException {
+	public void writeCodeFile(String datasetName, CodeFile file) {
 
-		String fileName = datasetName + DELIMITER + file.getBranch() + DELIMITER + file.getFileName();
-		String path = OUTPUT_FOLDER + fileName;
-		BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+		String fileName, branch, simpleFileName;
 		
-		List<Integer> int_array = file.getintMap();
-		for(int i=0; i  < int_array.size(); i++)
+		// Removes ".java" from file name
+		simpleFileName = file.getFileName().substring(0, file.getFileName().length() - 5); 
+
+		// Defines file name - datasetName * GitBranch * simpleFileName.txt
+		if(file instanceof FixedFile) 
+			fileName = file.getBranch()+"-"+simpleFileName+".txt";
+		else
+			fileName = "buggy-"+simpleFileName+".txt";
+
+		// Stores in output/datasetName/guitBranch
+		if(file instanceof FixedFile) {
+			FixedFile ff = (FixedFile) file;
+			branch = ff.getBuggyBranch(); 
+		}
+		else
+			branch = file.getBranch();
+
+		String dirPath = OUTPUT_FOLDER + datasetName + "/" + branch;
+		
+		// If folders to dirpath don't exist, they are created
+		File directory = new File(dirPath);
+    	if (!directory.exists())
+        	directory.mkdirs(); 
+      
+        // Actually writes to file
+		String filePath = dirPath + "/" + fileName;
+		System.out.print("Wrote file: \'"+fileName+"\'\t->\tdir: \'"+dirPath+"\' ");
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+		
+			List<Integer> int_array = file.getintMap();
+			for(int i=0; i  < int_array.size(); i++)
     		writer.write(int_array.get(i).toString() + " ");
      
-    	writer.close();
+    		writer.close();
+			System.out.print(ANSI_GREEN + "SUCCESS" + ANSI_RESET + "\n"); 
+
+		} catch(IOException e) {
+			System.out.print(ANSI_RED + "ERROR" + ANSI_RESET + "\n");
+			System.out.println(e.getMessage());
+		}
 	}
 
 
@@ -123,4 +163,5 @@ public class IntMapper {
 				System.out.println("\""+token+"\" \t-> " + mapping.get(token));
 		}
 	}
+
 }

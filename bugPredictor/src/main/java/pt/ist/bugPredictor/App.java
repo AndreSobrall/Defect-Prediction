@@ -39,8 +39,5 @@ public class App
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-
-		// TODO: write mapper to file
-		// mapper.writeToFile(...)
-    }
+	}
 }

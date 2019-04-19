@@ -13,12 +13,14 @@ import pt.ist.bugPredictor.Dataset;
 
 public class FixedFile extends CodeFile {
 	private Dataset dataset;
+	private String buggyBranch;
 
-	public FixedFile(String fileName, Dataset dataset) {
+	public FixedFile(String fileName, String buggyBranch, Dataset dataset) {
 		setFileName(fileName);
 		setDataset(dataset);
 		setFilePath();
-		branch = "master";
+		this.branch 	 = "master";
+		this.buggyBranch = buggyBranch;
 	} 
 
 	@Override
@@ -69,6 +71,10 @@ public class FixedFile extends CodeFile {
 		printInfo();
 		System.out.println("-----------------------------");
 		System.out.println(" ");
+	}
+
+	public String getBuggyBranch() {
+		return buggyBranch;
 	}
 
 }

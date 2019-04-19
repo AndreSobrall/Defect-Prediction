@@ -59,7 +59,7 @@ public class Dataset {
 
 		// For each buggy file, process the corresponding fixed file
 		for(BuggyFile buggy : buggies) {
-			FixedFile fixed = new FixedFile(buggy.getFileName(), this);
+			FixedFile fixed = new FixedFile(buggy.getFileName(), buggy.getBranch(), this);
 			addCodeFile(fixed, buggy);
 		}
 	}
@@ -83,8 +83,8 @@ public class Dataset {
 
 	// Process a FixedFile: 
 	// creates a FixedFile and processes contents
-	public FixedFile processFixedFile(String fileName, Dataset dataset) throws IOException, InterruptedException {
-		FixedFile fixed = new FixedFile(fileName, dataset);
+	public FixedFile processFixedFile(BuggyFile buggy, Dataset dataset) throws IOException, InterruptedException {
+		FixedFile fixed = new FixedFile(buggy.getFileName(), buggy.getBranch(), dataset);
 		fixed.processContents(tokenizer, mapper);
 		return fixed;
 	}
@@ -104,7 +104,7 @@ public class Dataset {
 	public void processCodeFiles(String branch) throws IOException, InterruptedException {
 		BuggyFile buggy = processBuggyFile(branch);
 		checkoutToMasterBranch();
-		FixedFile fixed = processFixedFile(buggy.getFileName(), this);
+		FixedFile fixed = processFixedFile(buggy, this);
 		addCodeFile(fixed, buggy);
 	}
 
