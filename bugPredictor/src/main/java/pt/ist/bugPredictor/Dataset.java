@@ -26,8 +26,7 @@ public class Dataset {
 	private IntMapper mapper;
 	private Tokenizer tokenizer;
 	
-	private final String[] MASTER = {"master", "HEAD"}; // Aux String[]
-	
+	private final String[] MASTER = {"master", "HEAD"}; // Aux String[]	
 
 	public Dataset(String name, String path, IntMapper mapper) {
 		this.datasetName = name;
@@ -107,6 +106,18 @@ public class Dataset {
 		checkoutToMasterBranch();
 		FixedFile fixed = processFixedFile(buggy.getFileName(), this);
 		addCodeFile(fixed, buggy);
+	}
+
+	public void writeCodeFiles() {
+		for(String branch : codeFiles.keySet()) {
+			for(CodeFile file : codeFiles.get(branch)) {
+				try {
+					mapper.writeCodeFile(this.datasetName, file); 
+				} catch(Exception e) {
+					System.out.println(e.getMessage());
+				}
+			}
+		}
 	}
 
 	/* ------------------------ */
@@ -192,6 +203,11 @@ public class Dataset {
 	}
 
 	public void printDataset() {
+		printDatasetInfo();
+		printFiles();
+	}
+
+	public void printDatasetInfo() {
 		System.out.println("\n---------- DATASET Info ----------");
 		System.out.println("Dataset Name: \t" + datasetName);
 		System.out.println("Dataset Path: \t" + datasetPath);
@@ -199,6 +215,14 @@ public class Dataset {
 		System.out.println("Current Branch: "+ currentBranch);
 		System.out.println("Other Available Branches: " + branches.size());
 		System.out.println("-------------------------------\n");
+	}
+
+	public void printFiles() {
+		for(String branch : codeFiles.keySet()) {
+			for(CodeFile file : codeFiles.get(branch)) {
+				file.print();
+			}
+		}
 	}
 
 }

@@ -40,37 +40,35 @@ public class FixedFile extends CodeFile {
 			// switches do master branch if needed
 			this.dataset.checkoutToMasterBranch();
 
-			// searchs dataset directory for file
+			// searchs dataset directory for fixed file
 			String cmd = "find "+ this.dataset.getDatasetPath() + " -iname " + this.fileName;
 	    	Process process = Runtime.getRuntime().exec(cmd, null, new File("."));
 	    	process.waitFor();
 
-	    	// TODO: make sure it always retrieve correct file
 	    	BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-	    	setFilePath(reader.readLine());
+	    	// TODO: assert this is the case.
+	    	// I'm assuming first line read from find is the correct one.
+	    	setFilePath(reader.readLine()); 
 
 	    	String line; int i = 0;
     		while ((line = reader.readLine()) != null) { 
     			if(i == 0)
-    				System.out.println("Other possibilites: ");
+    				System.out.println("Other FixedFile possibilites: ");
     			System.out.println(line);
     			i++;
 	    	}
-	    	printDebugInfo();
 
 	    } catch(Exception e) {
 	    	e.printStackTrace();
 	    }
 	}
 
-	public void printDebugInfo() {
-		// System.out.println("diff line:" + diffLine);
+	@Override
+	public void print() {
 		System.out.println("--------- FIXED FILE ---------");
-		System.out.println("filePath: \t" + this.filePath);
-		System.out.println("fileName: \t" + this.fileName);
+		printInfo();
 		System.out.println("-----------------------------");
 		System.out.println(" ");
 	}
-
 
 }

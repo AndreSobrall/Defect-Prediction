@@ -8,6 +8,8 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import pt.ist.bugPredictor.CodeFile;
+
 public class IntMapper {
 
 	/* ------------------------ */
@@ -16,6 +18,9 @@ public class IntMapper {
 
 	private Map<String, Integer> mapping;
 	private int id;
+	private final String OUTPUT_FOLDER = "./output/";
+	private final String DELIMITER = "*";
+
 
 	public IntMapper() {
 		this.mapping = new HashMap<String, Integer>();
@@ -57,12 +62,13 @@ public class IntMapper {
 	/*		File Writer		*/
 	/* -------------------- */
 
-	public void writeToFile(String fileName, List<Integer> int_array) throws IOException {
+	public void writeCodeFile(String datasetName, CodeFile file) throws IOException {
 
-		String path = "output/" + fileName;
-
+		String fileName = datasetName + DELIMITER + file.getBranch() + DELIMITER + file.getFileName();
+		String path = OUTPUT_FOLDER + fileName;
 		BufferedWriter writer = new BufferedWriter(new FileWriter(path));
 		
+		List<Integer> int_array = file.getintMap();
 		for(int i=0; i  < int_array.size(); i++)
     		writer.write(int_array.get(i).toString() + " ");
      

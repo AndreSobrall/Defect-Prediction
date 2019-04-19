@@ -32,9 +32,9 @@ public class App
 
     	try {
         	Dataset dataset = app.datasets.get("accumulo");
-        	dataset.printDataset();
-			// dataset.processCodeFiles();
         	dataset.processCodeFiles("bugs-dot-jar_ACCUMULO-1183_cfbf5999");
+        	dataset.writeCodeFiles();
+        	// dataset.printDataset();
 
 		} catch(Exception e) {
 			e.printStackTrace();

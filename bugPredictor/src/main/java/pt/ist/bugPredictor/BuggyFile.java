@@ -8,6 +8,7 @@ import java.io.IOException;
 
 public class BuggyFile extends CodeFile {
 	private final String diffPath;
+	private String diffLine;
 
 	public BuggyFile(String branch, String datasetPath) {
 		this.branch   = branch;
@@ -28,7 +29,7 @@ public class BuggyFile extends CodeFile {
 				}
 			}
 
-			printDebugInfo(line);
+			this.diffLine = line;
 
 			reader.close();
 		} catch(IOException e) {
@@ -54,13 +55,14 @@ public class BuggyFile extends CodeFile {
 		this.fileName = tokens[tokens.length-1];
 	}
 
-	public void printDebugInfo(String diffLine) {
-		// System.out.println("diff line:" + diffLine);
+	@Override
+	public void print() {
 		System.out.println("--------- BUGGY FILE ---------");
-		System.out.println("filePath: \t" + this.filePath);
-		System.out.println("fileName: \t" + this.fileName);
+		// System.out.println("diff line:" + diffLine);
+		printInfo();
 		System.out.println("-----------------------------");
 		System.out.println(" ");
 	}
+
 
 }

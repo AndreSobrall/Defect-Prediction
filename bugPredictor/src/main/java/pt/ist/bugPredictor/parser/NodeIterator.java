@@ -35,7 +35,8 @@ public class NodeIterator {
             addToTokens(cd.getNameAsString());
             return true; 
         }
-        else if(node instanceof Statement) // parse statements of a method.
+        
+        if(node instanceof Statement) // parse statements of a method.
         {
             if(node instanceof ExpressionStmt) { 
                 ExpressionStmt st = (ExpressionStmt) node;

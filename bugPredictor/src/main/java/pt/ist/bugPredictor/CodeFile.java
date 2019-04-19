@@ -8,8 +8,8 @@ public abstract class CodeFile {
 	protected String  fileName;
 	protected String  filePath;
 	protected String  branch;
-	private List<String>  tokenVector;
-	private List<Integer> intMap;
+	private   List<String>  tokenVector;
+	private   List<Integer> intMap;
 
 	// Tokenizes file and maps to int vector
 	public void processContents(Tokenizer tokenizer, IntMapper mapper) {
@@ -29,6 +29,35 @@ public abstract class CodeFile {
 
 	protected abstract void setFilePath(String path);
 	protected abstract void setFileName(String name);
+	public 	  abstract void print();
+
+	public void write(String folderPath) {
+		
+	}
+
+
+	/* ------------------------ */
+    /*		Print Functions		*/
+    /* ------------------------ */
+
+	protected void printInfo() {
+		System.out.println("fileName: \t" + this.fileName);
+		System.out.println("filePath: \t" + this.filePath);
+		System.out.println("git branch: \t" + this.branch);
+		// printTokens();
+	}
+
+	public void printTokens() {
+        System.out.println("[");
+        for(String token : this.tokenVector)
+            System.out.println(token+",");
+        System.out.println("]");
+        System.out.println(); // empty line
+    }
+
+    /* ---------------- */
+    /*		Getters		*/
+    /* ---------------- */
 
 	public String getFilePath() {
 		return filePath;
