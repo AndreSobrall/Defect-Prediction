@@ -47,8 +47,6 @@ public class Dataset {
 	// checkout to master
 	// get the fixed file
 	// store as entry in codeFiles using brnachName
-	// ...........
-	// Begin by doing it only for the current branch
 	public void processCodeFiles() throws IOException, InterruptedException {
 		
 		// Process all buggy files first in order to only checkout to master once
