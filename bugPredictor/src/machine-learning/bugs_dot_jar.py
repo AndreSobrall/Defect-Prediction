@@ -93,7 +93,7 @@ def getDatasetShape():
 	for dataset_name in root_dir:
 		nr_issues += len(list_directory(DIR_PATH + "/" + dataset_name)) # number of folders under the dataset dir
 
-	# TODO: Make Parsing and Mapping Side save this info on "output/max_size.txt"
+	# Read issue_max_size from "output/max_size.txt"
 	with open(DIR_PATH+"/max_size.txt") as f:
 		file_content = f.read()
 		issue_max_size = int(file_content)

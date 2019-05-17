@@ -106,7 +106,10 @@ public class Dataset {
 		addCodeFile(fixed, buggy);
 	}
 
+	// Outputs dataset files into corresponding mappings in ".txt" format
 	public void writeCodeFiles() {
+		
+		// Writes each token vector mapping in a ".txt" file
 		for(String branch : codeFiles.keySet()) {
 			for(CodeFile file : codeFiles.get(branch)) {
 				try {
@@ -115,6 +118,14 @@ public class Dataset {
 					System.out.println(e.getMessage());
 				}
 			}
+		}
+
+		// Writes the maximum file size analyzed in a ".txt" file
+		// Helps python ML script define the shape of the dataset
+		try {
+			mapper.writeMaxFileSize(); 
+		} catch(Exception e) {
+			System.out.println(e.getMessage());
 		}
 	}
 

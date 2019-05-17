@@ -2,5 +2,6 @@ backup/
 .DS_Store
 .*/.DS_Store
 bugPredictor/target/
+bugPredictor/output
 bugs-dot-jar/
 bugs-dot-jar-dissection/
