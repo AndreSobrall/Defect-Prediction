@@ -83,7 +83,8 @@ public class IntMapper {
 	// 		IfStatement 
 	// 		WhileStatement 
 	// 		DoStatement
-	// 		ForStatement 
+	// 		ForStatement
+	//      ForEachStmt
 	// 		AssertStatement 
 	// 		BreakStatement 
 	// 		ContinueStatement 
@@ -92,11 +93,11 @@ public class IntMapper {
 	// 		SynchronizedStatement 
 	// 		TryStatement
 	// 		SwitchStatement 
-	// 		BlockStatement 
+	// 		BlockStatement -> only simbolizes entry of body of method or class {}
 	private void setFreqMapping() {
-		String[] freq_tokens = {"if", "while", "do", "for", "assert", 
+		String[] freq_tokens = {"if", "while", "do", "for", "foreach","assert", 
 								"break", "continue", "return", "throw", 
-								"synchronized", "try", "switch", "block"};
+								"synchronized", "try", "switch"};
 
 		this.freq_mapping = new HashMap<String,Integer>();
 

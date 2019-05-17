@@ -8,17 +8,30 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.expr.ObjectCreationExpr; 
-import com.github.javaparser.ast.stmt.*; //Statement, BlockStmt, ExpressionStmt
-import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.stmt.BlockStmt;
- 
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+// No Geral -> Statement
+// BlockStmt, Expression, ExpressionStmt
+// Controlo:        IfStatement, SwitchStatement
+// Ciclos:          WhileStatement, DoStatement, ForStatement, ForEachStmt 
+// Gestao Ciclos:   BreakStatement, ContinueStatement, ReturnStatement 
+// Outras:          AssertStatement, TryStatement, ThrowStatement, SynchronizedStatement 
+import com.github.javaparser.ast.stmt.*; 
+
 public class NodeIterator {
+
+    public final String ANSI_RESET = "\u001B[0m";
+    public final String ANSI_RED   = "\u001B[31m";
+    public final String ANSI_GREEN = "\u001B[32m";
+
+    /* ------------------------ */
+    /*      Data Structures     */
+    /* ------------------------ */
     
     private List<String> tokens = new ArrayList();
  
     public void explore(Node node) {
         if (handle(node)) {
+            // if handle returns true, we explore child nodes
             for (Node child : node.getChildNodes()) {
                 explore(child);
             }
@@ -27,7 +40,31 @@ public class NodeIterator {
 
     private boolean handle(Node node) {
 
-        String aux = new String();
+        String aux, token;
+
+        // These are the tokens that are regarded as less frequent.
+        // These are the variables that vary between classes.
+        // Less Frequent:
+        //      FormalParameter
+        //      BasicType 
+        //      PackageDeclaration 
+        //      InterfaceDeclaration 
+        //      CatchClauseParameter 
+        //      ClassDeclaration 
+        //      MethodInvocation 
+        //      SuperMethodInvocation 
+        //      MemberReference 
+        //      SuperMemberReference 
+        //      ConstructorDeclaration 
+        //      ReferenceType 
+        //      MethodDeclaration 
+        //      VariableDeclarator 
+        //      StatementExpression 
+        //      TryResource CatchClause 
+        //      CatchClauseParameter 
+        //      SwitchStatementCase 
+        //      ForControl 
+        //      EnhancedForControl
 
         if(node instanceof CallableDeclaration) // method declaration, add to token
         { 
@@ -38,6 +75,11 @@ public class NodeIterator {
         
         if(node instanceof Statement) // parse statements of a method.
         {
+            Statement stmt = (Statement) node;
+
+            if(stmt.isBlockStmt())
+                return true;
+
             if(node instanceof ExpressionStmt) { 
                 ExpressionStmt st = (ExpressionStmt) node;
                 if (st.getExpression().isMethodCallExpr()) { // method calls
@@ -66,15 +108,76 @@ public class NodeIterator {
                 }
                 return false;
             }
-        }
-    
-        return true;
+
+            
+            // Apenas keywords, nao tem corpo para explorar.
+            // assert, throw, break, continue, return
+            if(stmt.isAssertStmt() || stmt.isThrowStmt() ||
+               stmt.isBreakStmt()  || stmt.isContinueStmt() ||
+               stmt.isReturnStmt()) 
+            {   
+                aux = stmt.toString();                
+                token = parseKeyword(aux);
+                // UNCOMMENT TO PRINT
+                // debugPrint(aux, token);
+                
+                addToTokens(token);
+                return false;
+            } 
+            // if, while, do, for, synchronized, try, switch
+            else if(stmt.isIfStmt()     || stmt.isWhileStmt() || stmt.isDoStmt()     || 
+                    stmt.isForStmt()    || stmt.isTryStmt()   || stmt.isSwitchStmt() || 
+                    stmt.isSynchronizedStmt()) 
+            {
+                aux = stmt.toString();
+                token = parseKeyword(aux);
+                // UNCOMMENT TO PRINT
+                debugPrint(aux, token);
+                addToTokens(token);
+                return true;
+            }
+            // foreach
+            // Tem token custom para destinguir do "for" normal
+            // nao da para utilizar funcao parseKeyword()
+            else if(stmt.isForEachStmt()) {
+                aux   = stmt.toString();
+                token = "foreach";
+                // UNCOMMENT TO PRINT
+                debugPrint(aux, token);
+                addToTokens(token);
+                return true;
+            }   
+            
+        } //end stament exploration
+
+        // TODO: Change
+        return true; // by default, explores children
     }
 
     private void addToTokens(String token) 
     {
-        // System.out.println(token);
+        // System.out.print(ANSI_GREEN + token +  ANSI_RESET + "\n");
         this.tokens.add(token);
+    }
+
+    private String parseKeyword(String original) {
+        String token;
+        
+        if(original.contains(" "))
+            // gets the only the keyword
+            token = original.split(" ")[0];
+        else
+            token = original;
+
+        if(token.contains(";")) // Ex: return; -> return
+            token = token.substring(0, token.length()-1);
+
+        return token;
+    }
+
+    private void debugPrint(String original, String token) {
+        System.out.print(ANSI_RED + original +  ANSI_RESET + "\n");
+        System.out.print(ANSI_GREEN + token +  ANSI_RESET + "\n");
     }
 
     public void printTokens() {
