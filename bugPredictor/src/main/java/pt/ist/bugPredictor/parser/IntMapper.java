@@ -93,11 +93,20 @@ public class IntMapper {
 	// 		SynchronizedStatement 
 	// 		TryStatement
 	// 		SwitchStatement 
-	// 		BlockStatement -> only simbolizes entry of body of method or class {}
+	// 		SwitchEntry
+	// 		CatchClause 
+
+	// 	(ver NodeIterator para + info.)
+	// 		MethodDeclaration 
+	// 		ClassDeclaration 
+	// 		ConstructorDeclaration
+	// 		EnumDeclaration  
+
 	private void setFreqMapping() {
-		String[] freq_tokens = {"if", "while", "do", "for", "foreach","assert", 
-								"break", "continue", "return", "throw", 
-								"synchronized", "try", "switch"};
+		String[] freq_tokens = {"<if>", "<while>", "<do>", "<for>", "<foreach>","<assert>", 
+								"<break>", "<continue>", "<return>", "<throw>", "<synchronized>", 
+								"<try>", "<switch>", "<case>", "<catch>", "<method-declaration>",
+								"<class-declaration>", "<constructor-declaration>", "<enum-declaration>"};
 
 		this.freq_mapping = new HashMap<String,Integer>();
 

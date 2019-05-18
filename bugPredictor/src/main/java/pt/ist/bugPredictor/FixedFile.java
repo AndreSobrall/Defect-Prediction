@@ -44,13 +44,14 @@ public class FixedFile extends CodeFile {
 
 			// searchs dataset directory for fixed file
 			String cmd = "find "+ this.dataset.getDatasetPath() + " -iname " + this.fileName;
+
 	    	Process process = Runtime.getRuntime().exec(cmd, null, new File("."));
 	    	process.waitFor();
 
 	    	BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 	    	// TODO: assert this is the case.
 	    	// I'm assuming first line read from find is the correct one.
-	    	setFilePath(reader.readLine()); 
+	    	setFilePath(reader.readLine());
 
 	    	String line; int i = 0;
     		while ((line = reader.readLine()) != null) { 
