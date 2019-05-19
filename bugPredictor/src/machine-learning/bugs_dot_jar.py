@@ -61,7 +61,7 @@ def load_data():
 				# store label data
 				if("buggy" in file_name):
 					labels[idx]	= 2
-				elif("master" in file_name):
+				else:
 					labels[idx] = 1
 
 				idx = idx + 1;
@@ -70,6 +70,15 @@ def load_data():
 		print(ANSI_GREEN + "[CORRECT]:"+ ANSI_RESET +" Saw as many issues as expected.[",idx,"/",labels.shape[0],"]")
 	else:
 		print(ANSI_YELLOW + "[WARNING]:"+ ANSI_RESET + " Some issues are being ignored. [",idx,"/",labels.shape[0],"]")
+
+
+	## Uncomment to see longest row.
+	# w = 0
+	# while(dataset[w,dataset.shape[1]-1] == 0): 
+	# 	w = w + 1;
+	# print(w)
+	# print(dataset[w])
+
 
 	# -------------- # 
 	#  split dataset #
@@ -128,6 +137,7 @@ def list_directory(path):
 
 def main():
 	(train_src, train_labels), (test_src, test_labels) = load_data()
+	print(train_labels)
 
 if __name__ == "__main__":
     main()
