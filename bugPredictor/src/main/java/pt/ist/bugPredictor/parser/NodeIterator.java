@@ -15,9 +15,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 
-import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
 // No Geral -> Statement
 // BlockStmt, Expression, ExpressionStmt
 // Controlo:        IfStatement, SwitchStatement
@@ -73,6 +71,7 @@ public class NodeIterator {
                 //     PackageDeclaration pd = bd.asPackageDeclaration();
                 //     token = pd.getName().asString();
                 // }
+
                 // ClassDeclaration or InterfaceDeclaration 
                 if(bd.isClassOrInterfaceDeclaration()) 
                 {
@@ -109,7 +108,7 @@ public class NodeIterator {
                 // UNCOMMENT TO PRINT ALL
                 // debugPrint(aux, token);
                 // inspectChildren(bd, token);
-                System.out.print(ANSI_GREEN + token +  ANSI_RESET + "\n");
+                // System.out.print(ANSI_GREEN + token +  ANSI_RESET + "\n");
                 addToTokens(token);
                 return true; 
             }
@@ -124,36 +123,85 @@ public class NodeIterator {
             if(stmt.isBlockStmt())
                 return true;
 
-            // TODO: Review Method invocations
-            if(node instanceof ExpressionStmt) { 
+            // Expressions
+            if(stmt.isExpressionStmt()) 
+            { 
                 ExpressionStmt st = (ExpressionStmt) node;
-                if (st.getExpression().isMethodCallExpr()) { // method calls
-                    MethodCallExpr mc = st.getExpression().asMethodCallExpr();
-                    aux = mc.getNameAsString();
-                    // System.out.println("Method Call: " + aux);
-                    addToTokens(aux);
+                Expression expr   = st.getExpression();
+                
+                // method calls
+                // MethodInvocation (already done?)
+                if (expr.isMethodCallExpr()) 
+                {   
+                    aux = expr.toString();
+                    token = "<method-invocation>";
+                    
+                    // UNCOMMENT TO PRINT ALL
+                    // debugPrint(aux, token);
+                    // inspectChildren(expr, token);                    
+                    
+                    addToTokens(token);
+                    
+                    return false;
                 }
-                else {
-                    if(st.getExpression().isVariableDeclarationExpr()) {
-                        VariableDeclarationExpr vd = st.getExpression().asVariableDeclarationExpr();
-                        for(VariableDeclarator v : vd.getVariables())
-                            if(!v.getType().isPrimitiveType() && !v.getType().isArrayType()) {
-                                // System.out.println("Variable Declaration: " + st);
-                                aux = v.getType().toString();
-                                // System.out.println("Type: " + aux);
-                                addToTokens(aux);
-                                if(v.getInitializer().isPresent() && !v.getInitializer().get().isObjectCreationExpr()) {
-                                    aux = v.getInitializer().get().toString();
-                                    // System.out.println("MethodCall to init: " + aux);
-                                    addToTokens(aux);
-                                }
-                            }
+                // SuperMethodInvocation 
+                else if(expr.isSuperExpr()) {
+                    aux = expr.toString();
+                    token = "<super>";
+                    
+                    // UNCOMMENT TO PRINT ALL
+                    // debugPrint(aux, token);
+                    // inspectChildren(expr, token);                    
+                    
+                    addToTokens(token);
+                    
+                    return false;
+                }
+                else if(expr.isMethodReferenceExpr()) {
+                    aux = expr.toString();
+                    token = expr.asMethodReferenceExpr().getIdentifier();
 
-                    } // TODO: assignments needed?
+                    // UNCOMMENT TO PRINT ALL
+                    // debugPrint(aux, token);
+
+                    addToTokens(token);
+
+                    return false;
                 }
+
+                else if(expr.isVariableDeclarationExpr()) 
+                {
+                    VariableDeclarationExpr vd = expr.asVariableDeclarationExpr();
+                    
+                    for(VariableDeclarator v : vd.getVariables())
+                        
+                        // Only stores non-primitive and non-array types
+                        if(!v.getType().isPrimitiveType() && !v.getType().isArrayType())
+                        {   
+                            aux = v.toString();  
+                            token = v.getType().toString();
+                             
+                            // UNCOMMENT TO PRINT ALL
+                            // debugPrint(aux, token);
+                            
+                            addToTokens(token);
+
+                            // TODO: toggle on/off, see results.
+                            // Stores initializer 
+                            // if(v.getInitializer().isPresent() && !v.getInitializer().get().isObjectCreationExpr())
+                            // {
+                            //     aux = v.getInitializer().get().toString();
+                            //     // System.out.println("MethodCall to init: " + aux);
+                            //     addToTokens(aux);
+                            // }
+                        }
+
+                    return false;
+                }
+
                 return false;
             }
-
+            
             
             // Apenas keywords. Nao tem corpo para explorar.
             // assert, throw, break, continue, return
@@ -173,9 +221,9 @@ public class NodeIterator {
 
             // Queremos explorar o corpo ({})
             // if, while, do, for, synchronized, try, switch
-            else if(stmt.isIfStmt()     || stmt.isWhileStmt()  || stmt.isDoStmt()      || 
-                    stmt.isForStmt()    || stmt.isSwitchStmt() || stmt.isSynchronizedStmt() ||
-                    stmt.isTryStmt()) 
+            else if(stmt.isIfStmt()     || stmt.isWhileStmt()  || stmt.isDoStmt() ||
+                    stmt.isSwitchStmt() || stmt.isSynchronizedStmt() || stmt.isTryStmt() ||
+                    stmt.isForStmt()) 
             {
                 aux = stmt.toString();
                 token = parseKeyword(aux);
@@ -186,7 +234,7 @@ public class NodeIterator {
                 addToTokens(token);
                 return true;
             }
-            
+
             // foreach
             // Tem token custom para destinguir do "for" normal
             // Nao da para utilizar funcao parseKeyword()
@@ -200,17 +248,6 @@ public class NodeIterator {
                 addToTokens(token);
                 return true; 
             }
-
-            // UNCOMMENT TO INSPECT SINGLE NODES    
-            // else if(stmt.isTryStmt()) {
-            //     aux   = stmt.toString();
-            //     token = "<try>";
-            //     // UNCOMMENT TO PRINT
-            //     debugPrint(aux, token);
-            //     inspectChildren(stmt, token);
-            //     addToTokens(token);
-            //     return true;
-            // }
 
             // Ignore: nao e preciso explorar child nodes.
             else if(stmt.isEmptyStmt() || stmt.isUnparsableStmt() || stmt.isLabeledStmt())
@@ -264,24 +301,7 @@ public class NodeIterator {
 
             addToTokens(token);
             return true;
-        }
-
-        // TODO: Invocations
-        // MethodInvocation (already done?)
-        // SuperMethodInvocation 
-
-        // TODO: See FOR children, see if there i somthin interesting 
-        // TODO: ForControl EnhancedForControl
-
-        // TODO: Declarations
-        // BasicType 
-        // VariableDeclarator
-
-        // TODO: Reference
-        // MemberReference 
-        // SuperMemberReference 
-        // ReferenceType 
-             
+        }     
 
         return true; // by default, explores children
     }

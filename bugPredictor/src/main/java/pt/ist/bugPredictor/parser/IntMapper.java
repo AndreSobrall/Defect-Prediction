@@ -101,12 +101,16 @@ public class IntMapper {
 	// 		ClassDeclaration 
 	// 		ConstructorDeclaration
 	// 		EnumDeclaration  
+	// 		MethodInvocation  
+	// 		SuperMethodInvocation  
+
 
 	private void setFreqMapping() {
 		String[] freq_tokens = {"<if>", "<while>", "<do>", "<for>", "<foreach>","<assert>", 
 								"<break>", "<continue>", "<return>", "<throw>", "<synchronized>", 
 								"<try>", "<switch>", "<case>", "<catch>", "<method-declaration>",
-								"<class-declaration>", "<constructor-declaration>", "<enum-declaration>"};
+								"<class-declaration>", "<constructor-declaration>", "<enum-declaration>",
+								"<method-invocation>", "<super>"};
 
 		this.freq_mapping = new HashMap<String,Integer>();
 
@@ -161,7 +165,7 @@ public class IntMapper {
 
 		// Defines file name as "GitBranch * simpleFileName.txt"
 		if(file instanceof FixedFile) 
-			fileName = file.getBranch()+"-"+simpleFileName+".txt";
+			fileName = "fixed-"+simpleFileName+".txt";
 		else
 			fileName = "buggy-"+simpleFileName+".txt";
 
@@ -183,7 +187,6 @@ public class IntMapper {
       
         // Actually writes to file
 		String filePath = dirPath + "/" + fileName;
-		System.out.print("Wrote file: \'"+fileName+"\'\t->\tdir: \'"+dirPath+"\' ");
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
 		
@@ -192,12 +195,12 @@ public class IntMapper {
     		writer.write(int_array.get(i).toString() + " ");
      
     		writer.close();
-			System.out.print(ANSI_GREEN + "SUCCESS" + ANSI_RESET + "\n"); 
-
+			System.out.print(ANSI_GREEN + "[SUCCESS WRITING]:" + ANSI_RESET);
 		} catch(IOException e) {
-			System.out.print(ANSI_RED + "ERROR" + ANSI_RESET + "\n");
+			System.out.print(ANSI_RED + "[ERROR WRITING]:" + ANSI_RESET + "\n");
 			System.out.println(e.getMessage());
 		}
+		System.out.print(" \'"+fileName+"\'\t->\tdir: \'"+dirPath+"\' \n");
 	}
 
 	// Writes Max FileSize to "./output/max_size.txt"
@@ -207,19 +210,17 @@ public class IntMapper {
 		
 		// Expects dirPath to end in "/"
 		String filePath = OUTPUT_FOLDER + fileName;
-		
-		System.out.print("Wrote file: \'"+fileName+"\'\t\t->\tdir: \'"+OUTPUT_FOLDER+"\' ");
-		
+				
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));    
 			writer.write(this.max_file_size.toString());
     		writer.close();
-			System.out.print(ANSI_GREEN + "SUCCESS" + ANSI_RESET + "\n"); 
-
+			System.out.print(ANSI_GREEN + "[SUCCESS WRITING]:" + ANSI_RESET);
 		} catch(IOException e) {
-			System.out.print(ANSI_RED + "ERROR" + ANSI_RESET + "\n");
+			System.out.print(ANSI_RED + "[ERROR WRITING]:" + ANSI_RESET + "\n");
 			System.out.println(e.getMessage());
 		}
+		System.out.print(" \'"+fileName+"\'\t->\tdir: \'"+filePath+"\' \n");
 	}
 
 

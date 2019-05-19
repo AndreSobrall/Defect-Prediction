@@ -17,6 +17,10 @@ import pt.ist.bugPredictor.parser.IntMapper;
 
 
 public class Dataset {
+	public final String ANSI_RESET = "\u001B[0m";
+	public final String ANSI_RED   = "\u001B[31m";
+	public final String ANSI_GREEN = "\u001B[32m";
+
 	private String datasetName;
 	private String datasetPath;
 	private String currentBranch;
@@ -42,32 +46,23 @@ public class Dataset {
 		}
 	}
 
-	// TODO: Populate codeFiles
-	// For each branch get buggy file
-	// checkout to master
-	// get the fixed file
-	// store as entry in codeFiles using brnachName
+	// Processes each pair of buggy and fixed files of the Dataset
 	public void processCodeFiles() throws IOException, InterruptedException {
-		
-		// Process all buggy files first in order to only checkout to master once
-		List<BuggyFile> buggies = processBuggyFiles();
-
-		// Switch to the git master branch
-		checkoutToMasterBranch();
-
-		// For each buggy file, process the corresponding fixed file
-		for(BuggyFile buggy : buggies) {
-			FixedFile fixed = new FixedFile(buggy.getFileName(), buggy.getBranch(), this);
-			addCodeFile(fixed, buggy);
-		}
+		for(String branch : branches)
+			processCodeFiles(branch);
 	}
 
-	// For each git branch processes a BuggyFile: 
-	public List<BuggyFile> processBuggyFiles() throws IOException, InterruptedException {
-		List<BuggyFile> buggies = new ArrayList<BuggyFile>();
-		for(String branch : branches)
-			buggies.add(processBuggyFile(branch));
-		return buggies;
+	public void processCodeFiles(String branch) throws IOException, InterruptedException {
+		
+		// Reads and tokenizes buggy file
+		BuggyFile buggy = processBuggyFile(branch);
+		// System.out.println("buggyFilePath: " + ANSI_RED + buggy.getFilePath() + ANSI_RESET);
+		
+		// Reads and tokenizes fixed file
+		FixedFile fixed = processFixedFile(buggy);
+		// System.out.println("FixedFilePath: " + ANSI_GREEN + fixed.getFilePath() + ANSI_RESET);
+		
+		addCodeFile(fixed, buggy);
 	}
 
 	// Process a BuggyFile: 
@@ -81,8 +76,10 @@ public class Dataset {
 
 	// Process a FixedFile: 
 	// creates a FixedFile and processes contents
-	public FixedFile processFixedFile(BuggyFile buggy, Dataset dataset) throws IOException, InterruptedException {
-		FixedFile fixed = new FixedFile(buggy.getFileName(), buggy.getBranch(), dataset);
+	public FixedFile processFixedFile(BuggyFile buggy) throws IOException, InterruptedException {
+		String fixedBranch = getFixedBranch(buggy.getBranch());
+		checkoutGitBranch(fixedBranch);
+		FixedFile fixed = new FixedFile(buggy.getFileName(), buggy.getFilePath(), fixedBranch, buggy.getBranch());
 		fixed.processContents(tokenizer, mapper);
 		return fixed;
 	}
@@ -97,13 +94,10 @@ public class Dataset {
 		codeFiles.put(branch,files);
 	}
 
-	// TODO: Remove
-	// Only here to test entire pipeline
-	public void processCodeFiles(String branch) throws IOException, InterruptedException {
-		BuggyFile buggy = processBuggyFile(branch);
-		checkoutToMasterBranch();
-		FixedFile fixed = processFixedFile(buggy, this);
-		addCodeFile(fixed, buggy);
+	// From buggyBranch extract the fixed branch
+	public String getFixedBranch(String buggyBranch) {
+		String tokens[] = buggyBranch.split("_");
+		return tokens[2];
 	}
 
 	// Outputs dataset files into corresponding mappings in ".txt" format
@@ -183,12 +177,6 @@ public class Dataset {
     		currentBranch = branchName; 
     	}
 	}
-
-
-	public void checkoutToMasterBranch() throws IOException, InterruptedException {
-			checkoutGitBranch(MASTER[0]);
-	}
-
 
 
 	/* ------------------------ */
