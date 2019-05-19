@@ -1,6 +1,13 @@
 import os
 import numpy as np
 
+# colors
+ANSI_RESET  = "\u001B[0m"
+ANSI_RED    = "\u001B[31m"
+ANSI_GREEN  = "\u001B[32m"
+ANSI_YELLOW = "\u001B[33m"
+ANSI_BLUE   = "\u001B[34m"
+
 # Path to Mapping output
 DIR_PATH = "../../output"
 
@@ -9,7 +16,6 @@ DIR_PATH = "../../output"
 def load_data():
 	# Collect the info on how the dataset is organized (nr_rows, nr_collumns)
 	dataset_shape = getDatasetShape()
-
 	# Array 2D
 	# Tem (2*nr_datasets*nr_issues) linhas.
 	# Cada entrada e um array de comprimento "issue_max_size"
@@ -21,24 +27,25 @@ def load_data():
 	# Cada entrada tem o valor de uma das 2 labels:
 	# "master" -> 1
 	# "buggy"  -> 2
-	labels  = np.zeros(shape=(dataset_shape[0]), dtype=int) 
+	labels  = np.zeros(shape=(dataset_shape[0]), dtype=int)
 
 	idx = 0;
 
 	# For each issue in the dataset in the output folder
 	for dataset_name in list_directory(DIR_PATH):
-		issues_path = DIR_PATH + "/" + dataset_name
-		# print(issues_path)
+		issues = DIR_PATH + "/" + dataset_name
+		# print(issues)
 
 		# For each issue in the dataset
-		for issue in list_directory(issues_path):
-			# print(issue)
-			issue_path = issues_path + "/" + issue_name
+		for issue in list_directory(issues):
+			issue_path = issues + "/" + issue
+			# print("\t",issue_path)
 			
 			# For each (correct, buggy) pair inside each issue folder
 			for file_name in list_directory(issue_path):
-				# print(file_name)
 				file_path = issue_path + "/" + file_name
+				# print("\t\t", file_path)
+
 				with open(file_path) as f:
 					i = 0
 					file_content = f.read()
@@ -60,13 +67,14 @@ def load_data():
 				idx = idx + 1;
 
 	if(idx == labels.shape[0]):
-		print("[CORRECT] Saw as many issues as expected.["+idx+"\\"+labels.shape[0]+"]")
+		print(ANSI_GREEN + "[CORRECT]:"+ ANSI_RESET +" Saw as many issues as expected.[",idx,"/",labels.shape[0],"]")
 	else:
-		print("[WARNING!!!]: Some issues are being ignored. ["+idx+"\\"+labels.shape[0]+"]")
+		print(ANSI_YELLOW + "[WARNING]:"+ ANSI_RESET + " Some issues are being ignored. [",idx,"/",labels.shape[0],"]")
 
 	# -------------- # 
 	#  split dataset #
 	# -------------- # 
+	# TODO: cross-validation
 	# percentage: 70/30 or 80/20
 	split_idx = int(labels.shape[0]*0.7)
 	
@@ -93,15 +101,16 @@ def getDatasetShape():
 	for dataset_name in root_dir:
 		nr_issues += len(list_directory(DIR_PATH + "/" + dataset_name)) # number of folders under the dataset dir
 
-	# Read issue_max_size from "output/max_size.txt"
+	# Read issue_max_size from	 "output/max_size.txt"
 	with open(DIR_PATH+"/max_size.txt") as f:
 		file_content = f.read()
 		issue_max_size = int(file_content)
 
-	print("Bugs.jar shape is: ("+ 2*nr_datasets*nr_issues+", "+ issue_max_size+")")
+	dataset_shape = (2*nr_issues+1, issue_max_size)
+	print("Bugs.jar shape is: ",dataset_shape)
 	
 	# times two(2*) == because each issue has a (correct, buggy) pair
-	return (2*nr_datasets*nr_issues, issue_max_size)
+	return dataset_shape
 
 
 # Retorna listagem do diretorio em 'path'
@@ -118,8 +127,7 @@ def list_directory(path):
 	return directory
 
 def main():
-	print("Hello!")
-	#load_data()
+	(train_src, train_labels), (test_src, test_labels) = load_data()
 
 if __name__ == "__main__":
     main()
