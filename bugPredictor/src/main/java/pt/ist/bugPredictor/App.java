@@ -77,6 +77,8 @@ public class App
 	        // Tokenize code files
 	        dataset.processCodeFiles(branch);
 
+	        dataset.printFiles();
+
 	        // Map them to int's and output to *.txt file
 	        dataset.writeCodeFiles(); 
 
@@ -103,8 +105,8 @@ public class App
     public static void main( String[] args )
     {	
     	App app = new App();
-    	// app.processBranch("accumulo", "bugs-dot-jar_ACCUMULO-1544_0cf2ff72");
-    	app.processDataset("accumulo");
-    	// app.processAll();
+    	// app.processBranch("accumulo", "bugs-dot-jar_ACCUMULO-2390_28294266");
+    	// app.processDataset("accumulo");
+    	app.processAll();
 	}
 }

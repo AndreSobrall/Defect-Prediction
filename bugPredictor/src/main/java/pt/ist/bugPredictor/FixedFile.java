@@ -41,7 +41,8 @@ public class FixedFile extends CodeFile {
 		System.out.println("--------- FIXED FILE ---------");
 		printInfo();
 		System.out.println("-----------------------------");
-		System.out.println(" ");
+		System.out.println(" \n");
+		this.printTokens();
 	}
 
 	public String getBuggyBranch() {

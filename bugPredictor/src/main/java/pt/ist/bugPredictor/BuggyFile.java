@@ -61,7 +61,8 @@ public class BuggyFile extends CodeFile {
 		// System.out.println("diff line:" + diffLine);
 		printInfo();
 		System.out.println("-----------------------------");
-		System.out.println(" ");
+		System.out.println(" \n");
+		this.printTokens();
 	}
 
 

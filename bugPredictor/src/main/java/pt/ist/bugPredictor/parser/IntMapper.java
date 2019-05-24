@@ -29,10 +29,10 @@ public class IntMapper {
 	private final String OUTPUT_FOLDER = "./output/";
 
 	public IntMapper() {
-		setFreqMapping();
-		setLessMapping();
 		this.id = 1;
 		this.max_file_size = 0;
+		setFreqMapping();
+		setLessMapping();
 	}
 
 	/* -------------------- */
@@ -43,8 +43,12 @@ public class IntMapper {
 		
 		List<Integer> int_array = new ArrayList<Integer>();
 		
-		for(String token : tokens)
-			int_array.add(getTokenId(token));
+		for(String token : tokens) {
+			int id = getTokenId(token);
+			// UNCOMENT TO PRINT <token>:<id>
+			// System.out.print(token + ":" +  id + "\n");
+			int_array.add(id);
+		}
 
 		// updates max file size, if needed.
 		setMaxFileSize(int_array.size());
@@ -110,7 +114,7 @@ public class IntMapper {
 								"<break>", "<continue>", "<return>", "<throw>", "<synchronized>", 
 								"<try>", "<switch>", "<case>", "<catch>", "<method-declaration>",
 								"<class-declaration>", "<constructor-declaration>", "<enum-declaration>",
-								"<method-invocation>", "<super>"};
+								"<method-invocation>", "<super>", "<field>"};
 
 		this.freq_mapping = new HashMap<String,Integer>();
 
@@ -192,7 +196,7 @@ public class IntMapper {
 		
 			List<Integer> int_array = file.getintMap();
 			for(int i=0; i  < int_array.size(); i++)
-    		writer.write(int_array.get(i).toString() + " ");
+    			writer.write(int_array.get(i).toString() + " ");
      
     		writer.close();
 			System.out.print(ANSI_GREEN + "[SUCCESS WRITING]:" + ANSI_RESET);

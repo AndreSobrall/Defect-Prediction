@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from sklearn.model_selection import cross_val_score
 
 # colors
 ANSI_RESET  = "\u001B[0m"
@@ -13,7 +14,7 @@ DIR_PATH = "../../output"
 
 # output:
 # (train_src, train_labels), (test_src, test_labels)
-def load_data():
+def load_data(trainning_set_size):
 	# Collect the info on how the dataset is organized (nr_rows, nr_collumns)
 	dataset_shape = getDatasetShape()
 	# Array 2D
@@ -71,7 +72,6 @@ def load_data():
 	else:
 		print(ANSI_YELLOW + "[WARNING]:"+ ANSI_RESET + " Some issues are being ignored. [",idx,"/",labels.shape[0],"]")
 
-
 	## Uncomment to see longest row.
 	# w = 0
 	# while(dataset[w,dataset.shape[1]-1] == 0): 
@@ -79,23 +79,8 @@ def load_data():
 	# print(w)
 	# print(dataset[w])
 
-
-	# -------------- # 
-	#  split dataset #
-	# -------------- # 
-	# TODO: cross-validation
-	# percentage: 70/30 or 80/20
-	split_idx = int(labels.shape[0]*0.7)
+	return split_dataset(dataset, labels, trainning_set_size)
 	
-	# Trainning set
-	train_src 	 = dataset[0:split_idx-1]
-	train_labels = labels[0:split_idx-1]
-
-	# Test set
-	test_src	 = dataset[split_idx:]
-	test_labels  = labels[split_idx:]
-
-	return (train_src, train_labels), (test_src, test_labels)
 
 
 # output:
@@ -135,9 +120,37 @@ def list_directory(path):
 
 	return directory
 
+
+# -------------- # 
+#  split dataset #
+# -------------- # 
+#
+# Splits the data into trainning and test sets
+# according to "trainning_set_size" parameter
+
+def split_dataset(dataset, labels, trainning_set_size):
+	# Check train_set_size, atleast 50%
+	if(trainning_set_size <= 0.5 or trainning_set_size >= 1):
+		old = train_set_size
+		trainning_set_size = 0.7
+		print("Trainning set size is not a value between 0 < x < 1.")
+		print("Setting to default. ",old," -> ", trainning_set_size)
+
+	# percentage according to trainning_set_size
+	split_idx = int(labels.shape[0]*trainning_set_size)
+	
+	# Trainning set
+	train_src 	 = dataset[0:split_idx-1]
+	train_labels = labels[0:split_idx-1]
+
+	# Test set
+	test_src	 = dataset[split_idx:]
+	test_labels  = labels[split_idx:]
+
+	return (train_src, train_labels), (test_src, test_labels)
+
 def main():
-	(train_src, train_labels), (test_src, test_labels) = load_data()
-	print(train_labels)
+	(train_src, train_labels), (test_src, test_labels) = load_data(0.7)
 
 if __name__ == "__main__":
     main()

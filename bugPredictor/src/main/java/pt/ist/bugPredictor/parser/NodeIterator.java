@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.ImportDeclaration;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -51,6 +54,22 @@ public class NodeIterator {
 
         String aux, token = new String();
 
+        // not interesting 
+        if(node instanceof PackageDeclaration) {
+            return false;
+        }
+
+        // import declarations 
+        if(node instanceof ImportDeclaration) {
+            // aux = node.toString()
+            token = "<import>";
+            // UNCOMMENT TO PRINT
+            // debugPrint(aux, token);
+            // inspectChildren(bd, token);
+            addToTokens(token);
+            return false;
+        }
+
         // Parse declarations 
         if(node instanceof BodyDeclaration) {
 
@@ -58,7 +77,8 @@ public class NodeIterator {
 
             // Only interesting ones.
             if(bd.isClassOrInterfaceDeclaration() || bd.isMethodDeclaration()  ||
-               bd.isConstructorDeclaration()      || bd.isEnumDeclaration()) 
+               bd.isConstructorDeclaration()      || bd.isEnumDeclaration()    ||
+               bd.isFieldDeclaration()) 
             {    
                 aux = bd.toString();
 
@@ -104,7 +124,14 @@ public class NodeIterator {
                     // debugPrint(aux, token);
                     // inspectChildren(bd, token);
                 } 
-                
+                //
+                else if(bd.isFieldDeclaration()) 
+                {   
+                    token = "<field>";
+                    // UNCOMMENT TO PRINT
+                    // debugPrint(aux, token);
+                    // inspectChildren(bd, token);
+                }
                 // UNCOMMENT TO PRINT ALL
                 // debugPrint(aux, token);
                 // inspectChildren(bd, token);
@@ -170,7 +197,7 @@ public class NodeIterator {
                 }
 
                 else if(expr.isVariableDeclarationExpr()) 
-                {
+                {   
                     VariableDeclarationExpr vd = expr.asVariableDeclarationExpr();
                     
                     for(VariableDeclarator v : vd.getVariables())
@@ -188,15 +215,17 @@ public class NodeIterator {
 
                             // TODO: toggle on/off, see results.
                             // Stores initializer 
-                            // if(v.getInitializer().isPresent() && !v.getInitializer().get().isObjectCreationExpr())
-                            // {
-                            //     aux = v.getInitializer().get().toString();
-                            //     // System.out.println("MethodCall to init: " + aux);
-                            //     addToTokens(aux);
-                            // }
+                            if(v.getInitializer().isPresent())
+                            {   
+                                if(!hasBlockStmt(v.getInitializer().get())) {
+                                    token = v.getInitializer().get().toString();
+                                    // System.out.println("MethodCall to init: " + aux);
+                                    addToTokens(token); 
+                                }
+                            }
                         }
 
-                    return false;
+                    return true;
                 }
 
                 return false;
@@ -250,8 +279,12 @@ public class NodeIterator {
             }
 
             // Ignore: nao e preciso explorar child nodes.
-            else if(stmt.isEmptyStmt() || stmt.isUnparsableStmt() || stmt.isLabeledStmt())
+            else if(stmt.isEmptyStmt() || stmt.isUnparsableStmt() || stmt.isLabeledStmt()) {
+                // System.out.println("Missed Statement:");
+                // System.out.println(node);
+                // System.out.println(node.getClass());
                 return false;
+            }
             
         } //end stament exploration
 
@@ -303,6 +336,10 @@ public class NodeIterator {
             return true;
         }     
 
+        // System.out.println("Missed Token:");
+        // System.out.println(node);
+        // System.out.println(node.getClass());
+
         return true; // by default, explores children
     }
 
@@ -339,7 +376,6 @@ public class NodeIterator {
         for (Node child : root.getChildNodes()) {
             System.out.print(ANSI_BLUE + nodeName + "-children:" + ANSI_RESET + "\n");
             System.out.print(ANSI_YELLOW + child.getClass().getName() + ANSI_RESET + "\n");
-
             // BlockStmt child nodes
             if(child.getClass().getName().equals("com.github.javaparser.ast.stmt.BlockStmt"))
                 for (Node childOfChild : child.getChildNodes()) {
@@ -348,6 +384,19 @@ public class NodeIterator {
                 }
         }
     }
+
+    // Used in Variable Declarator, to check if initializer has a body
+    // EX:  new InvocationHandler() { ...... }
+    private boolean hasBlockStmt(Node root) {
+        for (Node child : root.getChildNodes()) {
+            if(child.getClass().getName().equals("com.github.javaparser.ast.stmt.BlockStmt"))
+                return true;
+            if(hasBlockStmt(child))
+                return true; 
+        }
+        return false;
+    }
+
 
     // Ex: InstantiationException | IllegalAccessException
     // Solution: Always store them ordered by alphabetical order.
