@@ -1,8 +1,9 @@
 import os
-from bugs_dot_jar import list_directory
-from bugs_dot_jar import list_only_buggies_in_directory
+from aux_func import list_directory
+from aux_func import list_only_buggies_in_directory
 import filecmp
 
+# Path to Mapping output
 DIR_PATH = "/Users/andre/Desktop/Tese/bugPredictor/output"
 
 # colors
@@ -13,21 +14,24 @@ ANSI_YELLOW = "\u001B[33m"
 ANSI_CYAN   = "\u001B[36m"
 
 def find_broken_mappings(doPrintNames=False):
-	# ignore
-	# mappings that are not considered erros
-	# these depend on the context of the application
+	
 	# TODO: right now, it stores every non-diff files
 	# slowly manually verify these diff's are worthing ignore or 
 	# if the parser should be tweaked
+
+	# ignore
+	# mappings that are not considered erros
+	# these depend on the context of the application
 	to_ignore = []
+	
 	total  = 0
 	broken = 0
-	
-	print("Looking for Fixed and Buggy that have the same mapping (i.e. are broken):")
+
+	if(doPrintNames):
+		print("Looking for Fixed and Buggy that have the same mapping (i.e. are broken):")
+
 	# For each issue in the dataset in the output folder
 	for dataset_name in list_directory(DIR_PATH):
-		if(dataset_name != "accumulo"):
-			continue
 		local_total = 0
 		local_broken = 0;
 		if(dataset_name == "max_size.txt"):
@@ -38,7 +42,9 @@ def find_broken_mappings(doPrintNames=False):
 		for issue in list_directory(issues_path):
 			
 			issue_path = issues_path + "/" + issue
-			print(ANSI_CYAN + issue + ":" + ANSI_RESET)
+			
+			if(doPrintNames):
+				print(ANSI_CYAN + issue + ":" + ANSI_RESET)
 
 			# for each buggy file present
 			for file_name in list_only_buggies_in_directory(issue_path):
@@ -50,35 +56,44 @@ def find_broken_mappings(doPrintNames=False):
 				# Get the correspondet fixed file path
 				fixed = issue_path + "/" + "fixed-" + simpleFileName
 
-				print(fixed)
-				print(buggy)
+				# print(fixed)
+				# print(buggy)
 
 				# The diff should be broken, or else, the mapping is broken.
 				if(isNotDiff(buggy, fixed)):
 					local_broken = local_broken + 1
 					if(doPrintNames):
 						print(ANSI_YELLOW + "WARNING: " + file_name + ANSI_RESET)
-						# will not be loaded
-						to_ignore.append(buggy)
+					# will not be loaded
+					to_ignore.append(buggy)
 
 				elif(doPrintNames):
 					print(ANSI_GREEN + "CORRECT" + ANSI_RESET)
 
 				local_total = local_total + 1;
 
-		print("------------------------------------")
-		print(dataset_name," :[",local_broken,"/",local_total,"]")
-		print("------------------------------------")
+		if(doPrintNames):
+			print("------------------------------------")
+			print("Broken:  ",dataset_name," :[",local_broken,"/",local_total,"]")
+			print("Correct: ",dataset_name," :[",(local_total-local_broken),"/",local_total,"]")
+			print("------------------------------------")
 
 		broken = broken + local_broken
 		total  = total + local_total
 
-	print("Total of broken mappings: [",broken,"/",total,"]")
+	if(doPrintNames):
+		print("Total of broken mappings: [",broken,"/",total,"]")
 
-	return to_ignore
+	# Utilizado no shape do dataset
+	good_issues = 2 * (total-broken)
 
+	return (to_ignore, good_issues)
+
+
+# Compara o conteudo de dois, retorna "true" se forem iguais.
 def isNotDiff(fixed, buggy):
 	return filecmp.cmp(fixed, buggy, shallow=False)
+
 
 def main():
 	find_broken_mappings(True)

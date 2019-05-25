@@ -5,5 +5,5 @@ bugPredictor/target/
 bugPredictor/output
 bugs-dot-jar/
 bugs-dot-jar-dissection/
-./bugPredictor/src/machine-learning/__pycache__/*.pyc
-./bugPredictor/src/machine-learning/__pycache__/
+./bugPredictor/src/machine-learning/\_\_pycache\_\_/*.pyc
+./bugPredictor/src/machine-learning/\_\_pycache\_\_/
