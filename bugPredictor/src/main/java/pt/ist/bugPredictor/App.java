@@ -105,8 +105,8 @@ public class App
     public static void main( String[] args )
     {	
     	App app = new App();
-    	// app.processBranch("accumulo", "bugs-dot-jar_ACCUMULO-2390_28294266");
-    	// app.processDataset("accumulo");
-    	app.processAll();
+    	app.processBranch("accumulo", "bugs-dot-jar_ACCUMULO-218_15476a0d");
+    	//app.processDataset("accumulo");
+    	//app.processAll();
 	}
 }

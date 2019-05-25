@@ -27,7 +27,7 @@ public abstract class CodeFile {
 		this.intMap = mapper.getIntArray(tokenVector);
 	}
 
-	protected abstract void setFilePath(String path);
+	protected  void setFilePath(String path) {}
 	protected abstract void setFileName(String name);
 	public 	  abstract void print();
 

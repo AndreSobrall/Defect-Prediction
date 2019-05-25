@@ -54,22 +54,38 @@ public class Dataset {
 
 	public void processCodeFiles(String branch) throws IOException, InterruptedException {
 		
-		// Reads and tokenizes buggy file
-		BuggyFile buggy = processBuggyFile(branch);
-		// System.out.println("buggyFilePath: " + ANSI_RED + buggy.getFilePath() + ANSI_RESET);
+		// Reads diff file to learn the file path's of files that were changed
+		DiffParser diff = new DiffParser(this.datasetPath);
+		checkoutGitBranch(branch);
+		List<String> filePaths = diff.parseDiff();
+
+		List<BuggyFile> buggies = new ArrayList<BuggyFile>();
+
+		// This way has the necessary number of "git checkouts" 
+		// -> only once for x number of files
+		for(String filePath : filePaths) {
+			// Reads and tokenizes buggy file
+			BuggyFile buggy = processBuggyFile(branch, filePath);
+			System.out.println("buggyFilePath: " + ANSI_RED + buggy.getFilePath() + ANSI_RESET);
+			buggies.add(buggy);
+		}
 		
-		// Reads and tokenizes fixed file
-		FixedFile fixed = processFixedFile(buggy);
-		// System.out.println("FixedFilePath: " + ANSI_GREEN + fixed.getFilePath() + ANSI_RESET);
+		// Here is the same logic, in the fixed branch.
+		// Adds each fixed, buggy pair to data structure
+		for(BuggyFile buggy : buggies) {
+			// Reads and tokenizes fixed file
+			FixedFile fixed = processFixedFile(buggy);
+			System.out.println("FixedFilePath: " + ANSI_GREEN + fixed.getFilePath() + ANSI_RESET);
+			addCodeFile(fixed, buggy);
+		}
 		
-		addCodeFile(fixed, buggy);
 	}
 
 	// Process a BuggyFile: 
 	// checkouts to corresponding branch and creates a buggyFile
-	public BuggyFile processBuggyFile(String branch) throws IOException, InterruptedException {
+	public BuggyFile processBuggyFile(String branch, String filePath) throws IOException, InterruptedException {
 		checkoutGitBranch(branch);
-		BuggyFile buggy = new BuggyFile(branch, this.datasetPath);
+		BuggyFile buggy = new BuggyFile(branch, filePath);
 		buggy.processContents(tokenizer, mapper);
 		return buggy;
 	}
@@ -87,11 +103,23 @@ public class Dataset {
 	// Add an entry to codeFiles Map
 	// key: branchName, val: [fixed, buggy]
 	public void addCodeFile(FixedFile fixed, BuggyFile buggy) {
-		List<CodeFile> files = new ArrayList<CodeFile>();
+		List<CodeFile> files;
 		String branch = buggy.getBranch();
-		files.add(fixed);
-		files.add(buggy);
-		codeFiles.put(branch,files);
+		
+		// There is already an entry for this branch, update
+		if(codeFiles.containsKey(branch)) {
+			files = codeFiles.get(branch);
+			files.add(fixed);
+			files.add(buggy);
+		}
+		// first time adding entries for this branch
+		else {
+			files = new ArrayList<CodeFile>();
+			files.add(fixed);
+			files.add(buggy);
+			codeFiles.put(branch,files);
+		}
+		
 	}
 
 	// From buggyBranch extract the fixed branch

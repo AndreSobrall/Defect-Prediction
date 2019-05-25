@@ -120,6 +120,19 @@ def list_directory(path):
 
 	return directory
 
+# Retorna listagem do diretorio em 'path'
+def list_only_buggies_in_directory(path):
+	directory = os.listdir(path)
+
+	# Caso especial.
+	if(path == DIR_PATH):
+		directory.remove("max_size.txt")
+
+	if ".DS_Store" in directory:
+		directory.remove(".DS_Store")
+
+	return [ x for x in directory if "fixed" not in x ]
+
 
 # -------------- # 
 #  split dataset #
