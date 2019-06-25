@@ -8,7 +8,7 @@ def list_directory(path):
 	directory = os.listdir(path)
 
 	# Caso especial.
-	if(path == DIR_PATH):
+	if "max_size.txt" in directory:
 		directory.remove("max_size.txt")
 
 	if ".DS_Store" in directory:

@@ -2,6 +2,9 @@ package pt.ist.bugPredictor;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import pt.ist.bugPredictor.Dataset;
 import pt.ist.bugPredictor.parser.IntMapper;
 
@@ -22,9 +25,25 @@ public class App
 
 		this.datasets = new HashMap<String, Dataset>();
 
-		// for all datasets		
-		for(String datasetName : datasetNames)
-			this.datasets.put(datasetName, new Dataset(datasetName, "../bugs-dot-jar/" + datasetName, this.mapper));
+
+		if (Files.exists(Paths.get("../bugs-dot-jar/"))) {
+	
+			// for all datasets		
+			for(String datasetName : datasetNames) {
+				
+				String datasetpath = "../bugs-dot-jar/" + datasetName;
+
+				// if dataset exists
+				if(Files.exists(Paths.get(datasetpath)))
+					this.datasets.put(datasetName, new Dataset(datasetName, datasetpath, this.mapper));
+				else
+					System.out.println("Dataset \""+datasetName+"\" does not exist.");
+			}
+		} 
+		// if bugs.jar does not exist
+		else {
+			System.out.println("Dataset \"bugs-dot-jar\" does not exist in \"../bugs-dot-jar/\".");
+		}
 	}
 
 
@@ -55,7 +74,7 @@ public class App
     		
     		printHeader(datasetName);
 	        Dataset dataset = this.datasets.get(datasetName);
-	        	
+	       
 	        // Tokenize code files
 	        dataset.processCodeFiles();
 
@@ -73,7 +92,8 @@ public class App
     		
     		printHeader(datasetName);
 	        Dataset dataset = this.datasets.get(datasetName);
-	        	
+	        //dataset.printDatasetInfo();
+
 	        // Tokenize code files
 	        dataset.processCodeFiles(branch);
 
@@ -106,7 +126,7 @@ public class App
     {	
     	App app = new App();
     	// app.processBranch("accumulo", "bugs-dot-jar_ACCUMULO-218_15476a0d");
-    	//app.processDataset("accumulo");
-    	app.processAll();
+    	app.processDataset("accumulo");
+    	// app.processAll();
 	}
 }

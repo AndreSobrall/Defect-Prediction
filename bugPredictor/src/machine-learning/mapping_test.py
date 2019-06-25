@@ -4,7 +4,7 @@ from aux_func import list_only_buggies_in_directory
 import filecmp
 
 # Path to Mapping output
-DIR_PATH = "/Users/andre/Desktop/Tese/bugPredictor/output"
+DIR_PATH = "C:\\Users\\Andre\\Desktop\\ist\\Defect-Prediction\\bugPredictor\\output"
 
 # colors
 ANSI_RESET  = "\u001B[0m"
@@ -34,8 +34,6 @@ def find_broken_mappings(doPrintNames=False):
 	for dataset_name in list_directory(DIR_PATH):
 		local_total = 0
 		local_broken = 0;
-		if(dataset_name == "max_size.txt"):
-			continue
 		
 		issues_path = DIR_PATH + "/" + dataset_name
 		# For each issue in the dataset

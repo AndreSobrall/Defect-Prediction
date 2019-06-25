@@ -21,7 +21,7 @@ ANSI_YELLOW = "\u001B[33m"
 ANSI_CYAN   = "\u001B[36m"
 
 # Path to Mapping output
-DIR_PATH = "/Users/andre/Desktop/Tese/bugPredictor/output"
+DIR_PATH = "C:\\Users\\Andre\\Desktop\\ist\\Defect-Prediction\\bugPredictor\\output"
 
 # output:
 # (train_src, train_labels), (test_src, test_labels)
@@ -53,6 +53,7 @@ def load_data(trainning_set_size):
 
 	# For each issue in the dataset in the output folder
 	for dataset_name in list_directory(DIR_PATH):
+		
 		issues = DIR_PATH + "/" + dataset_name
 
 		# For each issue in the dataset
@@ -134,15 +135,22 @@ def getDatasetMetadata():
 	
 	# Read issue_max_size from	 "output/max_size.txt"
 	with open(DIR_PATH+"/max_size.txt") as f:
-		file_content = f.read()
-		issue_max_size = int(file_content)
+		line = f.readline() # reads only first line
+		file_content = line.split(" ")
+		issue_max_size = int(file_content[0])
 
 	dataset_shape = (nr_issues+1, issue_max_size)
 	print("Bugs.jar shape is: ",dataset_shape)
 	
 	return (files_to_ignore, dataset_shape)
 
-
+def getNumberOfFeatures():
+	# Read issue_max_size from	 "output/max_size.txt"
+	with open(DIR_PATH+"/max_size.txt") as f:
+		line = f.readline() # reads only first line
+		file_content = line.split(" ")
+		nr_features = int(file_content[1])
+	return nr_features
 
 # -------------- # 
 #  split dataset #

@@ -38,9 +38,11 @@ public class Dataset {
 		this.mapper 	 = mapper;
 		this.tokenizer   = new Tokenizer(); 
 		this.codeFiles 	 = new HashMap<String, List<CodeFile>>();
+		
 		try {
-			currentBranch = getCurrentGitBranch();
 			branches 	  = getDatasetGitBranches();
+			currentBranch = getCurrentGitBranch();
+
 		} catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -142,10 +144,10 @@ public class Dataset {
 			}
 		}
 
-		// Writes the maximum file size analyzed in a ".txt" file
-		// Helps python ML script define the shape of the dataset
+		// Writes the maximum file size AND number of unique features in a ".txt" file
+		// Helps python ML script define the shape of the datasets and the layers respectively
 		try {
-			mapper.writeMaxFileSize(); 
+			mapper.writeDatasetMetadata(); 
 		} catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -158,11 +160,13 @@ public class Dataset {
 	public String getCurrentGitBranch() throws IOException, InterruptedException {
     	String cmd = "git rev-parse --abbrev-ref HEAD";
     	Process process = Runtime.getRuntime().exec(cmd, null, new File(this.datasetPath));
+    	//System.out.println("Waiting for process to exec cmd: \""+cmd+"\"....");
     	process.waitFor();
     	BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
     	String currentBranch = reader.readLine();
     	if(currentBranch.equals(MASTER[1]))
     		currentBranch = MASTER[0];
+    	//System.out.println("Done. Result: \""+currentBranch+"\"");
     	return currentBranch;
 	}
 
@@ -174,9 +178,7 @@ public class Dataset {
 		// List branches
 		String cmd = "git branch -a", line;
 		Process process = Runtime.getRuntime().exec(cmd, null, new File(this.datasetPath));
-    	process.waitFor();
-
-    	// Read and Store interesting branches
+    	//System.out.println("Waiting for process to exec cmd: \""+cmd+"\"....");
     	BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
     	Pattern pattern = Pattern.compile("bugs-dot-jar_.*");
 
@@ -184,13 +186,14 @@ public class Dataset {
 			Matcher matcher = pattern.matcher(line);
 
 			if (matcher.find()){
-			    // System.out.println("Matched portion:\n" + matcher.group(0));
+			    //System.out.println("Matched portion:\n" + matcher.group(0));
 			    String gitBranch = matcher.group(0);
 
 			    if(!gitBranches.contains(gitBranch))
 			    	gitBranches.add(gitBranch);
 			} 
         }
+    	
 
         return gitBranches;
 	}

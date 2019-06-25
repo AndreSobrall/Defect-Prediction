@@ -188,36 +188,29 @@ public class IntMapper {
 		File directory = new File(dirPath);
     	if (!directory.exists())
         	directory.mkdirs(); 
-      
+      	
+      	String filePath = dirPath + "/" + fileName;
+
         // Actually writes to file
-		String filePath = dirPath + "/" + fileName;
-		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
-		
-			List<Integer> int_array = file.getintMap();
-			for(int i=0; i  < int_array.size(); i++)
-    			writer.write(int_array.get(i).toString() + " ");
-     
-    		writer.close();
-			System.out.print(ANSI_GREEN + "[SUCCESS WRITING]:" + ANSI_RESET);
-		} catch(IOException e) {
-			System.out.print(ANSI_RED + "[ERROR WRITING]:" + ANSI_RESET + "\n");
-			System.out.println(e.getMessage());
-		}
-		System.out.print(" \'"+fileName+"\'\t->\tdir: \'"+dirPath+"\' \n");
+		writeFile(fileName, filePath, file.getintMap());
 	}
 
 	// Writes Max FileSize to "./output/max_size.txt"
-	public void writeMaxFileSize() { 
-		
+	public void writeDatasetMetadata() { 		
 		String fileName =  "max_size.txt";
-		
-		// Expects dirPath to end in "/"
 		String filePath = OUTPUT_FOLDER + fileName;
-				
+		List<Integer> content = new ArrayList<Integer>();
+		content.add(this.max_file_size); // max sequence
+		content.add(this.id);			 // number of unique features
+		writeFile(fileName, filePath, content);
+	}
+
+	private void writeFile(String fileName, String filePath, List<Integer> content) 
+	{
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));    
-			writer.write(this.max_file_size.toString());
+			for(int i=0; i  < content.size(); i++)
+    			writer.write(content.get(i).toString() + " ");
     		writer.close();
 			System.out.print(ANSI_GREEN + "[SUCCESS WRITING]:" + ANSI_RESET);
 		} catch(IOException e) {
