@@ -24,11 +24,23 @@ ANSI_CYAN   = "\u001B[36m"
 DIR_PATH = "C:\\Users\\Andre\\Desktop\\ist\\Defect-Prediction\\bugPredictor\\output"
 
 # output:
-# (train_src, train_labels), (test_src, test_labels)
+# [[name1, dataset1], [name2, dataset2], ......, [name_n, datasetn]]
 def load_data(trainning_set_size):
+	datasets = []
+	# For each dataset in the bugs.jar mapped to the output folder
+	for dataset_name in list_directory(DIR_PATH):
+		datasets.append([dataset_name, load_dataset(dataset_name, trainning_set_size)])
+	return datasets
+
+# output:
+# (train_src, train_labels), (test_src, test_labels)
+def load_dataset(dataset_name, trainning_set_size):
+	# Dataset Path	
+	dataset_path = DIR_PATH + "/" + dataset_name
+
 	# Collect the info on how the dataset is organized (nr_rows, nr_collumns)
 	# And the files that contain erroneous mappings
-	files_to_ignore, dataset_shape = getDatasetMetadata()
+	files_to_ignore, dataset_shape = getDatasetMetadata(dataset_path, dataset_name)
 
 	# Array 2D
 	# Tem (2*nr_issues) linhas.
@@ -51,39 +63,34 @@ def load_data(trainning_set_size):
 	# Goes from 0 -> len(files_to_ignore)
 	ignore = 0;
 
-	# For each issue in the dataset in the output folder
-	for dataset_name in list_directory(DIR_PATH):
+	# For each issue in the dataset
+	for issue in list_directory(dataset_path):
+		issue_path = dataset_path + "/" + issue
 		
-		issues = DIR_PATH + "/" + dataset_name
+		# for each buggy file present
+		for buggy_name in list_only_buggies_in_directory(issue_path):
 
-		# For each issue in the dataset
-		for issue in list_directory(issues):
-			issue_path = issues + "/" + issue
+			# They must preserve the path until now.
+			buggy = issue_path + "/" + buggy_name
 			
-			# for each buggy file present
-			for buggy_name in list_only_buggies_in_directory(issue_path):
+			# files to ignore
+			if buggy in files_to_ignore:
+				ignore = ignore + 1 
+				continue
 
-				# They must preserve the path until now.
-				buggy = issue_path + "/" + buggy_name
-				
-				# files to ignore
-				if buggy in files_to_ignore:
-					ignore = ignore + 1 
-					continue
+			# get file name after "buggy-"
+			simpleFileName = buggy_name[6:]
 
-				# get file name after "buggy-"
-				simpleFileName = buggy_name[6:]
-
-				# Get the correspondet fixed file path
-				fixed_name = "fixed-" + simpleFileName
-				fixed = issue_path + "/" + fixed_name
-				
-				dataset, labels, idx = storeParsingData(buggy, buggy_name, dataset, labels, idx)
-				dataset, labels, idx = storeParsingData(fixed, fixed_name, dataset, labels, idx)
+			# Get the correspondet fixed file path
+			fixed_name = "fixed-" + simpleFileName
+			fixed = issue_path + "/" + fixed_name
+			
+			dataset, labels, idx = storeParsingData(buggy, buggy_name, dataset, labels, idx)
+			dataset, labels, idx = storeParsingData(fixed, fixed_name, dataset, labels, idx)
 	
 	# Just some asserts, to make sure everything was read
 	# Verifies total number of issues read
-	total_nr_issues = (labels.shape[0]-1)
+	total_nr_issues = (labels.shape[0])
 	if(idx == total_nr_issues):
 		print(ANSI_GREEN + "[CORRECT]:"+ ANSI_RESET +" Saw as many issues as expected.[",idx,"/",total_nr_issues,"]")
 	else:
@@ -118,11 +125,9 @@ def storeParsingData(file_path, file_name, dataset, labels, idx):
 		i = i + 1
 
 	# store fixed label data
-	if "fixed-" in file_name:
+	if "buggy-" in file_name:
 		labels[idx]	= 1
-	else:
-		labels[idx] = 2
-
+	
 	# inc index
 	idx = idx + 1
 	return dataset, labels, idx
@@ -130,23 +135,24 @@ def storeParsingData(file_path, file_name, dataset, labels, idx):
 
 # output:
 # (files_to_ignore, dataset_shape)
-def getDatasetMetadata():
-	(files_to_ignore, nr_issues) = find_broken_mappings()
+def getDatasetMetadata(dataset_path, dataset_name):
+	(files_to_ignore, nr_issues) = find_broken_mappings(dataset_path, dataset_name)
 	
 	# Read issue_max_size from	 "output/max_size.txt"
-	with open(DIR_PATH+"/max_size.txt") as f:
+	with open(dataset_path+"/max_size.txt") as f:
 		line = f.readline() # reads only first line
 		file_content = line.split(" ")
 		issue_max_size = int(file_content[0])
 
 	dataset_shape = (nr_issues+1, issue_max_size)
-	print("Bugs.jar shape is: ",dataset_shape)
+	print(dataset_name," shape is: ",dataset_shape)
 	
 	return (files_to_ignore, dataset_shape)
 
-def getNumberOfFeatures():
+def getNumberOfFeatures(dataset_name):
 	# Read issue_max_size from	 "output/max_size.txt"
-	with open(DIR_PATH+"/max_size.txt") as f:
+	dataset_path = DIR_PATH + "/" + dataset_name
+	with open(dataset_path+"/max_size.txt") as f:
 		line = f.readline() # reads only first line
 		file_content = line.split(" ")
 		nr_features = int(file_content[1])

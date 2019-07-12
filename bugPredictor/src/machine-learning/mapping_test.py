@@ -13,14 +13,14 @@ ANSI_GREEN  = "\u001B[32m"
 ANSI_YELLOW = "\u001B[33m"
 ANSI_CYAN   = "\u001B[36m"
 
-def find_broken_mappings(doPrintNames=False):
+def find_broken_mappings(dataset_path, dataset_name, doPrintNames=False):
 	
 	# TODO: right now, it stores every non-diff files
 	# slowly manually verify these diff's are worthing ignore or 
 	# if the parser should be tweaked
 
 	# ignore
-	# mappings that are not considered erros
+	# mappings that are not considered errors
 	# these depend on the context of the application
 	to_ignore = []
 	
@@ -29,61 +29,49 @@ def find_broken_mappings(doPrintNames=False):
 
 	if(doPrintNames):
 		print("Looking for Fixed and Buggy that have the same mapping (i.e. are broken):")
-
-	# For each issue in the dataset in the output folder
-	for dataset_name in list_directory(DIR_PATH):
-		local_total = 0
-		local_broken = 0;
+	
+	# For each issue in the dataset
+	for issue in list_directory(dataset_path):
 		
-		issues_path = DIR_PATH + "/" + dataset_name
-		# For each issue in the dataset
-		for issue in list_directory(issues_path):
-			
-			issue_path = issues_path + "/" + issue
-			
-			if(doPrintNames):
-				print(ANSI_CYAN + issue + ":" + ANSI_RESET)
-
-			# for each buggy file present
-			for file_name in list_only_buggies_in_directory(issue_path):
-				# get file name after "buggy-"
-				simpleFileName = file_name[6:]
-
-				# They must preserve the path until now.
-				buggy = issue_path + "/" + file_name
-				# Get the correspondet fixed file path
-				fixed = issue_path + "/" + "fixed-" + simpleFileName
-
-				# print(fixed)
-				# print(buggy)
-
-				# The diff should be broken, or else, the mapping is broken.
-				if(isNotDiff(buggy, fixed)):
-					local_broken = local_broken + 1
-					if(doPrintNames):
-						print(ANSI_YELLOW + "WARNING: " + file_name + ANSI_RESET)
-					# will not be loaded
-					to_ignore.append(buggy)
-
-				elif(doPrintNames):
-					print(ANSI_GREEN + "CORRECT" + ANSI_RESET)
-
-				local_total = local_total + 1;
-
+		issue_path = dataset_path + "/" + issue
+		
 		if(doPrintNames):
-			print("------------------------------------")
-			print("Broken:  ",dataset_name," :[",local_broken,"/",local_total,"]")
-			print("Correct: ",dataset_name," :[",(local_total-local_broken),"/",local_total,"]")
-			print("------------------------------------")
+			print(ANSI_CYAN + issue + ":" + ANSI_RESET)
 
-		broken = broken + local_broken
-		total  = total + local_total
+		# for each buggy file present
+		for file_name in list_only_buggies_in_directory(issue_path):
+			# get file name after "buggy-"
+			simpleFileName = file_name[6:]
+
+			# They must preserve the path until now.
+			buggy = issue_path + "/" + file_name
+			# Get the correspondet fixed file path
+			fixed = issue_path + "/" + "fixed-" + simpleFileName
+
+			# print(fixed)
+			# print(buggy)
+
+			# The diff should be broken, or else, the mapping is broken.
+			if(isNotDiff(buggy, fixed)):
+				broken += 1
+				if(doPrintNames):
+					print(ANSI_YELLOW + "WARNING: " + file_name + ANSI_RESET)
+				# will not be loaded
+				to_ignore.append(buggy)
+
+			elif(doPrintNames):
+				print(ANSI_GREEN + "CORRECT" + ANSI_RESET)
+
+			total += 1;
 
 	if(doPrintNames):
-		print("Total of broken mappings: [",broken,"/",total,"]")
+		print("------------------------------------")
+		print("Correct: ",dataset_name," :[",2*(total-broken),"/",2*total,"]")
+		print("Broken:  ",dataset_name," :[",2*broken,"/",2*total,"]")
+		print("------------------------------------")
 
 	# Utilizado no shape do dataset
-	good_issues = 2 * (total-broken)
+	good_issues = 2 * (total-broken) - 1
 
 	return (to_ignore, good_issues)
 

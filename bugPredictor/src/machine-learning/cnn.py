@@ -1,6 +1,7 @@
-from keras.utils import to_categorical
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten
+from keras.layers import Dense, Conv1D, MaxPooling1D, Flatten, Embedding
+from evaluate_model import eval_model
+from evaluate_model import randomize_row_placement
 import bugs_dot_jar
 
 # Objetivo de utilizacao da CNN:
@@ -16,78 +17,55 @@ import bugs_dot_jar
 # 1 Treinar o modelo
 # 2 Fazer feature extraction
 
+# Read parsing output and split into train and test sets
+datasets = bugs_dot_jar.load_data(0.7)
+for dataset in datasets:
+	# Model data
+	dataset_name = dataset[0]
+	(train_src, train_labels), (test_src, test_labels) = dataset[1]
+	# (train_src, train_labels) = randomize_row_placement(train_src, train_labels)
 
-class CNN_model:
+	# Model Metadata
+	max_sequence_length = len(train_src[1])
+	nr_of_features 		= bugs_dot_jar.getNumberOfFeatures(dataset_name)
+	nr_of_filters		= 5
 
-	def __init__(self, epochs):
-		self.epochs = epochs
-		self.loadDataset()
-		self.createModel()
+	print("\n\nModel Metadata:")
+	print("Dataset Name: ", dataset_name)
+	print("Max sequence Length: ",max_sequence_length)
+	print("Number of Features: ",nr_of_features)
+	print("Number of Filters: ", nr_of_filters)
+	print("Dataset Shape: ", train_src.shape)
+	print("Test set Shape: ", test_src.shape,"\n")
 
-	def createModel(self):
-		# create model
-		self.model = Sequential()
+	# create model
+	model = Sequential()
 
-		# add model layers
-		# all these -> TODO: best solution? why?
-		self.model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=self.input_shape)) 
-		self.model.add(Conv2D(32, kernel_size=3, activation='relu'))
-		self.model.add(Flatten())
-		self.model.add(Dense(10, activation='softmax'))
+	# # add model layers
+	model.add(Embedding(nr_of_features + 1,
+	                    64,  # Embedding size
+	                    input_length=max_sequence_length))
+	model.add(Conv1D(64, nr_of_filters, activation='relu'))
+	model.add(MaxPooling1D(nr_of_filters))
+	model.add(Flatten())
+	model.add(Dense(units=64, activation='relu'))
+	model.add(Dense(units=32, activation='relu'))
+	model.add(Dense(units=1, activation='sigmoid'))
 
-	def loadDataset(self):
-		# read parsing output and split into train and test sets
-		trainning_set_size = 0.7
-		(train_src, train_labels), (test_src, test_labels) = bugs_dot_jar.load_data(trainning_set_size)
+	# compile model
+	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-		self.train_src = train_src
-		self.train_labels = train_labels
-		self.test_src = test_src
-		self.test_labels = test_labels
+	# train model
+	# epochs_lst = {2,3,5,10,25,50,100}
+	epochs = 2
+	model.fit(train_src, train_labels, validation_data=(test_src, test_labels), epochs=epochs)
+	print(model.summary())
 
-		# Data pre-processing
-		# self.train_src = X_train.reshape(60000,28,28,1) # TODO: reshape according to parse dataset and model
-		# self.test_src  = X_test.reshape(10000,28,28,1)  # TODO: reshape according to parse dataset and model
-		self.input_shape = train_src.shape
-		# one-hot encode target column 
-		# self.validation_data = (to_categorical(train_labels), to_categorical(test_labels)) # TODO: best solution?
-		
-	def train():
-		self.compile()
-		self.fit(self.epochs)
+	# evaluate the model
+	loss, accuracy = model.evaluate(test_src, test_labels, verbose=0)
 
-	def compile():
-		self.model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+	eval_model(model, test_src, test_labels)
 
-	def fit(epochs):
-		self.model.fit(self.train_src, self.train_labels, validation_data=self.validation_data, epochs=epochs)
-
-	# ------------------------ # 
-	#  k-fold cross validation #
-	# ------------------------ # 
-	#
-	# The training set is split into k smaller sets
-	# For each of the k “folds”:
-	#	A model is trained using (k-1) folds as trainning data
-	#	The resulting model is validated on the reserved k fold.
-	#	i.e. it is used as a test set to compute a performance measure such as accuracy
-	# The performance measure reported by k-fold cross-validation 
-	# is then the average of the values computed in the loop.
-
-	def cross_validation(k):
-		scores = cross_val_score(self.model, self.train_src, self.train_labels, cv=k)
-		print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-		return scores
-
-
-def main():
-	cnn = CNN_model(5)
-	scores = cnn.cross_validation(5)
-	print(scores)
-
-if __name__ == "__main__":
-    main()
-
-
-
-
+	# save model and architecture to single file
+	model.save("model-"+dataset_name+".h5")
+	print("Saved model to disk")
