@@ -11,10 +11,8 @@ import pt.ist.bugPredictor.parser.IntMapper;
 public class App 
 {	
 	Map<String, Dataset> datasets;
-	IntMapper mapper;
 
 	public App() {
-		this.mapper = new IntMapper();
 		createDatasets();		
 	}
 
@@ -35,7 +33,7 @@ public class App
 
 				// if dataset exists
 				if(Files.exists(Paths.get(datasetpath)))
-					this.datasets.put(datasetName, new Dataset(datasetName, datasetpath, this.mapper));
+					this.datasets.put(datasetName, new Dataset(datasetName, datasetpath));
 				else
 					System.out.println("Dataset \""+datasetName+"\" does not exist.");
 			}
@@ -126,7 +124,14 @@ public class App
     {	
     	App app = new App();
     	// app.processBranch("accumulo", "bugs-dot-jar_ACCUMULO-218_15476a0d");
-    	app.processDataset("accumulo");
+    	// app.processDataset("accumulo");
+    	// app.processDataset("camel");
+    	// app.processDataset("commons-math"); 
+		// app.processDataset("flink"); 
+		app.processDataset("jackrabbit-oak");
+		app.processDataset("logging-log4j2");
+		app.processDataset("maven");
+		app.processDataset("wicket");
     	// app.processAll();
 	}
 }

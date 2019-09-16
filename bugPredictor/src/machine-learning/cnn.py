@@ -19,17 +19,30 @@ import bugs_dot_jar
 
 # Read parsing output and split into train and test sets
 datasets = bugs_dot_jar.load_data(0.7)
+lst = {"accumulo", "camel", "commons-math", "flink", "jackrabbit-oak", "logging-log4j2", "maven", "wicket"}
+
+header = "dataset -> F1 Score\n"
+result = [header]
+
 for dataset in datasets:
 	# Model data
 	dataset_name = dataset[0]
+	if(dataset_name == "accumulo"):
+		continue
 	(train_src, train_labels), (test_src, test_labels) = dataset[1]
 	# (train_src, train_labels) = randomize_row_placement(train_src, train_labels)
 
 	# Model Metadata
 	max_sequence_length = len(train_src[1])
 	nr_of_features 		= bugs_dot_jar.getNumberOfFeatures(dataset_name)
-	nr_of_filters		= 5
 
+	# Parameters
+	epochs = 10
+	embedding_size = 32
+	nr_of_filters = 32
+	filter_length = 3
+	
+	# train model
 	print("\n\nModel Metadata:")
 	print("Dataset Name: ", dataset_name)
 	print("Max sequence Length: ",max_sequence_length)
@@ -41,11 +54,12 @@ for dataset in datasets:
 	# create model
 	model = Sequential()
 
-	# # add model layers
+	# add model layers
 	model.add(Embedding(nr_of_features + 1,
-	                    64,  # Embedding size
+	                    embedding_size,  # Embedding size
 	                    input_length=max_sequence_length))
-	model.add(Conv1D(64, nr_of_filters, activation='relu'))
+
+	model.add(Conv1D(nr_of_filters, filter_length, activation='relu'))
 	model.add(MaxPooling1D(nr_of_filters))
 	model.add(Flatten())
 	model.add(Dense(units=64, activation='relu'))
@@ -56,16 +70,21 @@ for dataset in datasets:
 	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 	# train model
-	# epochs_lst = {2,3,5,10,25,50,100}
-	epochs = 2
 	model.fit(train_src, train_labels, validation_data=(test_src, test_labels), epochs=epochs)
-	print(model.summary())
+	# print(model.summary())
 
 	# evaluate the model
 	loss, accuracy = model.evaluate(test_src, test_labels, verbose=0)
 
-	eval_model(model, test_src, test_labels)
+	f1_score = eval_model(model, test_src, test_labels)
 
+	result.append(dataset_name + " " + str(f1_score) +"\n")
+	
 	# save model and architecture to single file
-	model.save("model-"+dataset_name+".h5")
-	print("Saved model to disk")
+	# model.save("model-"+dataset_name+"-embedding-",embed,".h5")
+	# print("Saved model to disk")
+
+f = open("results/last_results.txt", "a")
+for line in result:
+	f.write(line)
+f.close()

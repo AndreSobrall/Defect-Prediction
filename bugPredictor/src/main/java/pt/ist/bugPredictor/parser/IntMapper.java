@@ -196,9 +196,9 @@ public class IntMapper {
 	}
 
 	// Writes Max FileSize to "./output/max_size.txt"
-	public void writeDatasetMetadata() { 		
+	public void writeDatasetMetadata(String datasetName) { 		
 		String fileName =  "max_size.txt";
-		String filePath = OUTPUT_FOLDER + fileName;
+		String filePath = OUTPUT_FOLDER + datasetName + "/" + fileName;
 		List<Integer> content = new ArrayList<Integer>();
 		content.add(this.max_file_size); // max sequence
 		content.add(this.id);			 // number of unique features

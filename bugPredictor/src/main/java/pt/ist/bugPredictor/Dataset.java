@@ -32,10 +32,10 @@ public class Dataset {
 	
 	private final String[] MASTER = {"master", "HEAD"}; // Aux String[]	
 
-	public Dataset(String name, String path, IntMapper mapper) {
+	public Dataset(String name, String path) {
 		this.datasetName = name;
 		this.datasetPath = path;
-		this.mapper 	 = mapper;
+		this.mapper 	 = new IntMapper();
 		this.tokenizer   = new Tokenizer(); 
 		this.codeFiles 	 = new HashMap<String, List<CodeFile>>();
 		
@@ -147,7 +147,7 @@ public class Dataset {
 		// Writes the maximum file size AND number of unique features in a ".txt" file
 		// Helps python ML script define the shape of the datasets and the layers respectively
 		try {
-			mapper.writeDatasetMetadata(); 
+			mapper.writeDatasetMetadata(this.datasetName); 
 		} catch(Exception e) {
 			System.out.println(e.getMessage());
 		}

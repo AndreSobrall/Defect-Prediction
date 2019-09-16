@@ -2,7 +2,6 @@ from sklearn.metrics import f1_score
 from random import randrange
 import numpy as np
 
-
 # evaluate the model
 def eval_model(model, test_src, test_labels):
 	test_predict = model.predict(test_src)
@@ -14,9 +13,10 @@ def eval_model(model, test_src, test_labels):
 		else:
 			pred_labels.append(0)
 
-	print(pred_labels)
-	print(test_labels)
-	print(f1_score(test_labels, pred_labels, average='macro'))
+	# print(pred_labels)
+	# print(test_labels)
+	# print("F1 Score: ", f1_score(test_labels, pred_labels, average='macro'))
+	return f1_score(test_labels, pred_labels, average='macro')
 
 
 def randomize_row_placement(t_src, t_labels):

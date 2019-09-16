@@ -1,4 +1,5 @@
 backup/
+bugPredictor/output_all
 .DS_Store
 .*/.DS_Store
 bugPredictor/target/
@@ -7,3 +8,6 @@ bugs-dot-jar/
 bugs-dot-jar-dissection/
 ./bugPredictor/src/machine-learning/\_\_pycache\_\_/*.pyc
 bugPredictor/src/machine-learning/__pycache__
+bugPredictor/src/machine-learning/*.h5
+bugPredictor/src/machine-learning/model*
+bugPredictor/src/machine-learning/results
